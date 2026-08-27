@@ -372,6 +372,29 @@ button{font-family:var(--font);}
   .l-ventajas-inner{grid-template-columns:1fr;}
 }
 </style>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SITEIMPROVE ANALYTICS — cuenta 6277594 (Ayuntamiento de Madrid)
+
+     Instalación estándar servida por Siteimprove, NO auto-alojada: así el
+     modo sin cookies y el registro de eventos se siguen configurando desde
+     el panel del IAM. Ver Documentacion/analitica-siteimprove-texto-ayuntamiento-v1.0.md
+     (punto 3 de «Qué necesitamos de vosotros»).
+
+     El guard de hostname sustituye a la variable de entorno que usaríamos en
+     la plataforma Next.js: aquí no hay build, así que se filtra en runtime
+     para no mandar visitas de file:// ni de localhost a la cuenta del IAM.
+     ══════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var h = location.hostname;
+  if (!h || h === 'localhost' || h === '127.0.0.1' || h === '[::1]') return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://siteimproveanalytics.com/js/siteanalyze_6277594.js';
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 
