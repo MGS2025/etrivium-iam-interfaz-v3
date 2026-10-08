@@ -7,6 +7,7 @@
   'use strict';
 
   var BASE = document.body.getAttribute('data-base') || '';
+  var VER = document.body.getAttribute('data-v') || '';
   var LS_KEY = 'temario-tic-c1-v1';
   var LETRAS = ['A', 'B', 'C'];
 
@@ -272,11 +273,11 @@
     var datos = null, practico = null;
     function cargarPreguntas() {
       if (datos) return Promise.resolve(datos);
-      return fetch(BASE + 'assets/data/preguntas.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) { datos = d; return d; });
+      return fetch(BASE + 'assets/data/preguntas.json' + '?v=' + VER).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) { datos = d; return d; });
     }
     function cargarPractico() {
       if (practico) return Promise.resolve(practico);
-      return fetch(BASE + 'assets/data/simulacro-practico.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) { practico = d; return d; });
+      return fetch(BASE + 'assets/data/simulacro-practico.json' + '?v=' + VER).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) { practico = d; return d; });
     }
     function pregunta(ref) {
       var p = ref[0] === 'sp' ? (practico && practico.preguntas[ref[1]]) : (datos && datos[ref[0]] && datos[ref[0]][ref[1]]);
