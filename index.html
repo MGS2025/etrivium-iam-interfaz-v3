@@ -1,1335 +1,290 @@
 <!DOCTYPE html>
-<!--
-  ══════════════════════════════════════════════════════════════════
-  PROPUESTA VISUAL V3 — Plataforma TIC C1 Ayuntamiento de Madrid
-  Fecha: 2026-08-06
-  Base: Mockup/propuesta-visual-web-v2.html (design system + compliance
-        de identidad corporativa ya validados) + Interface_V2/INTERFAZ_V2.pdf
-        (arquitectura de información / pantallas propuestas por María)
-  ══════════════════════════════════════════════════════════════════
-
-  QUÉ CAMBIA RESPECTO A V2 (ver Interface_V03/CAMBIOS_V3.md para detalle):
-
-  [IA] Pantallas nuevas que pedía María y V2 no cubría:
-       - Temario (listado completo de 40 temas, descargable, con buscador)
-       - Parte I (10 temas) y Parte II (30 temas) como grids dedicados
-       - Tema individual con las 5 pestañas reales de María: Índice,
-         Contenido, Test final, Caso práctico, Descargas (V2 solo tenía
-         Índice/Contenido de mentira, el resto eran enlaces sin pantalla)
-       - Exámenes por temas: selector de tema → Nuevo test + historial
-         de intentos anteriores (pantalla propia, no un simple link)
-       - Resultado / revisión de intento (pantalla nueva, cierra el
-         bucle de "historial de intentos" que en V2 y en el PDF de
-         María eran números sueltos sin destino)
-
-  [Datos] Los 40 temas y sus títulos son los reales de la convocatoria
-       (BOAM 10.032), no los de relleno que tenía V2. Se generan por JS
-       desde un array TEMAS[] en vez de repetir HTML 40 veces.
-
-  [UI] Iconos: sistema propio de iconos SVG en línea (sprite <symbol>)
-       sustituye a los emoji de V2 — más consistente entre SO/navegador
-       y más "producto SaaS".
-       Historial: tablas con estado (badge verde/ámbar/rojo) en vez de
-       cuadrículas de números sin contexto.
-       Sidebar contextual: en un tema/test/examen, el sidebar cambia a
-       navegación local (como pedía María), en el resto es navegación
-       global. Se genera por JS (una sola plantilla, no repetida por
-       pantalla) para que quede consistente.
-
-  COLORES CORPORATIVOS (heredados de V2, Manual p.32 — sin cambios):
-    Azul:   #0055a0 (Pantone 286C) · Negro: #000000 · Blanco: #ffffff
-    azul-05 / azul-10 / azul-light siguen marcados como "UI funcional",
-    no corporativos (no crear variantes del azul, Manual p.31-32).
-  TIPOGRAFÍA: DM Sans (Manual p.34), respaldo Verdana.
-  ══════════════════════════════════════════════════════════════════
--->
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Propuesta Visual V3 — Plataforma TIC C1 Ayuntamiento de Madrid</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<style>
-/* ═══════════════════════════════════════════
-   DESIGN SYSTEM — Ayuntamiento de Madrid V3
-   ═══════════════════════════════════════════ */
-:root{
-  --azul:#0055a0; --azul-light:#e8f0f8; --azul-10:rgba(0,85,160,.10); --azul-05:rgba(0,85,160,.05);
-  --negro:#000000; --blanco:#ffffff;
-  --gris-50:#fafbfc; --gris-100:#f5f7fa; --gris-200:#e8ecf0; --gris-300:#d1d7df;
-  --gris-400:#9aa5b4; --gris-500:#707d8f; --gris-600:#4a5568; --gris-800:#2d3748;
-  --verde:#16a34a; --verde-bg:#f0fdf4; --verde-brd:#bbf0cf;
-  --rojo:#dc2626; --rojo-bg:#fef2f2; --rojo-brd:#fbcaca;
-  --amber:#d97706; --amber-bg:#fffbeb; --amber-brd:#fbe4b5;
-  --font:'DM Sans', Verdana, sans-serif;
-  --header-h:56px; --sidebar-w:264px;
-  --r-sm:6px; --r:10px; --r-lg:16px;
-  --sh-sm:0 1px 2px rgba(16,24,40,.06);
-  --sh:0 2px 8px rgba(16,24,40,.08);
-  --sh-lg:0 12px 32px rgba(16,24,40,.14);
-  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px; --sp-12:48px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:var(--font);color:var(--gris-800);background:var(--blanco);line-height:1.6;-webkit-font-smoothing:antialiased;}
-img{max-width:100%;display:block;}
-button{font-family:var(--font);}
-.icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:-3px;}
-.icon-lg{width:26px;height:26px;}
-.icon-sm{width:14px;height:14px;}
-
-/* demo tab bar */
-.demo-nav{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--negro);color:var(--blanco);
-  display:flex;align-items:center;gap:4px;padding:8px 16px;font-size:12.5px;overflow-x:auto;}
-.demo-nav span.tag{color:var(--gris-400);margin-right:8px;font-weight:700;white-space:nowrap;letter-spacing:.04em;}
-.demo-tab{padding:6px 12px;border-radius:6px;cursor:pointer;background:transparent;color:var(--gris-400);border:none;
-  font-family:var(--font);font-size:12.5px;font-weight:500;transition:all .15s;white-space:nowrap;}
-.demo-tab:hover{background:rgba(255,255,255,.1);color:var(--blanco);}
-.demo-tab.active{background:var(--azul);color:var(--blanco);}
-.screen{display:none;margin-top:40px;}
-.screen.active{display:block;}
-
-/* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--r-sm);
-  font-family:var(--font);font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;transition:all .15s;}
-.btn-lg{padding:15px 30px;font-size:15px;border-radius:var(--r);}
-.btn-sm{padding:8px 14px;font-size:12.5px;}
-.btn-white{background:var(--blanco);color:var(--azul);}
-.btn-white:hover{background:var(--gris-100);}
-.btn-outline{background:transparent;color:var(--blanco);border-color:rgba(255,255,255,.4);}
-.btn-outline:hover{border-color:var(--blanco);background:rgba(255,255,255,.1);}
-.btn-azul{background:var(--azul);color:var(--blanco);}
-.btn-azul:hover{filter:brightness(.87);}
-.btn-ghost{background:transparent;color:var(--azul);border-color:var(--gris-300);}
-.btn-ghost:hover{background:var(--gris-100);}
-.btn-negro{background:var(--negro);color:var(--blanco);}
-.btn-negro:hover{filter:brightness(1.3);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn-block{width:100%;}
-
-/* badges */
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap;}
-.badge-verde{background:var(--verde-bg);color:var(--verde);border:1px solid var(--verde-brd);}
-.badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-brd);}
-.badge-rojo{background:var(--rojo-bg);color:var(--rojo);border:1px solid var(--rojo-brd);}
-.badge-gris{background:var(--gris-100);color:var(--gris-500);border:1px solid var(--gris-200);}
-.badge-azul{background:var(--azul-10);color:var(--azul);border:1px solid var(--azul-light);}
-
-/* ═══ 1. LANDING ═══ */
-.l-header{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:var(--blanco);border-bottom:1px solid var(--gris-200);position:sticky;top:0;z-index:50;}
-.l-logo img{height:36px;}
-.l-header-links{display:flex;align-items:center;gap:28px;}
-.l-header-links a{font-size:13px;font-weight:700;color:var(--azul);text-decoration:none;text-transform:uppercase;letter-spacing:.06em;}
-.l-header-links a:hover{text-decoration:underline;}
-.l-hero{position:relative;min-height:520px;background:var(--azul);display:flex;align-items:center;padding:72px 48px;overflow:hidden;}
-.l-hero::after{content:'';position:absolute;top:0;right:0;bottom:0;width:55%;
-  background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect fill="rgba(255,255,255,0.03)" width="400" height="400"/><circle cx="260" cy="180" r="170" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/><circle cx="260" cy="180" r="120" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/><circle cx="260" cy="180" r="70" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/></svg>');
-  background-size:cover;opacity:.6;}
-.l-hero-content{max-width:600px;position:relative;z-index:1;}
-.l-plazas{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;color:var(--blanco);margin-bottom:20px;}
-.l-hero h1{font-size:36px;font-weight:700;color:var(--blanco);line-height:1.25;margin-bottom:14px;}
-.l-hero p{font-size:17px;color:rgba(255,255,255,.86);margin-bottom:32px;max-width:520px;}
-.l-hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
-.l-trust{display:flex;gap:28px;margin-top:40px;}
-.l-trust div{color:rgba(255,255,255,.75);font-size:12.5px;}
-.l-trust strong{display:block;color:var(--blanco);font-size:22px;font-weight:700;}
-
-.l-section{padding:72px 48px;max-width:1240px;margin:0 auto;}
-.l-section-head{max-width:640px;margin-bottom:40px;}
-.l-eyebrow{color:var(--azul);font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
-.l-section h2{font-size:28px;font-weight:700;color:var(--gris-800);}
-.l-section p.lede{color:var(--gris-600);font-size:15.5px;margin-top:10px;}
-
-.l-features{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
-.l-feat{padding:28px 22px;border:1px solid var(--gris-200);border-radius:var(--r-lg);transition:all .2s;background:var(--blanco);}
-.l-feat:hover{border-color:var(--azul);box-shadow:var(--sh-lg);transform:translateY(-3px);}
-.l-feat-icon{width:48px;height:48px;border-radius:12px;margin-bottom:16px;background:var(--azul-10);color:var(--azul);display:flex;align-items:center;justify-content:center;}
-.l-feat h3{font-size:15px;font-weight:700;color:var(--gris-800);margin-bottom:6px;}
-.l-feat p{font-size:13px;color:var(--gris-600);}
-
-.l-ventajas{background:var(--gris-50);padding:72px 48px;}
-.l-ventajas-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
-.l-ventajas-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
-.l-vent{display:flex;align-items:center;gap:12px;background:var(--blanco);padding:16px 18px;border-radius:var(--r);border:1px solid var(--gris-200);}
-.l-vent-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--verde-bg);color:var(--verde);display:flex;align-items:center;justify-content:center;}
-.l-vent span{font-size:13.5px;font-weight:600;color:var(--gris-800);}
-
-.l-cta{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;padding:64px 48px;background:var(--azul-05);}
-.l-cta h2{font-size:24px;font-weight:700;color:var(--gris-800);}
-.l-cta-btns{display:flex;gap:12px;}
-
-.banda-corporativa{background:var(--azul);width:100%;}
-.banda-inner{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;flex-wrap:wrap;gap:10px;}
-.banda-logo{height:26px;}
-.banda-tagline{font-family:var(--font);font-size:12.5px;font-weight:700;color:var(--blanco);letter-spacing:.16em;text-transform:uppercase;}
-
-/* ═══ 2. APP SHELL ═══ */
-.app{display:flex;min-height:calc(100vh - 40px);}
-.sidebar{width:var(--sidebar-w);background:var(--blanco);border-right:1px solid var(--gris-200);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:40px;height:calc(100vh - 40px);overflow-y:auto;}
-.sb-header{padding:18px 22px;border-bottom:1px solid var(--gris-200);display:flex;align-items:center;gap:10px;}
-.sb-header img{height:26px;flex-shrink:0;}
-.sb-nav{padding:14px 12px;flex:1;}
-.sb-section{font-size:10px;font-weight:700;color:var(--gris-400);text-transform:uppercase;letter-spacing:.08em;padding:14px 12px 6px;}
-.sb-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);font-size:13.5px;font-weight:600;color:var(--gris-600);text-decoration:none;transition:all .12s;cursor:pointer;border-left:3px solid transparent;}
-.sb-link:hover{background:var(--gris-100);color:var(--gris-800);}
-.sb-link.active{background:var(--azul-10);color:var(--azul);border-left-color:var(--azul);}
-.sb-link .icon{opacity:.85;}
-.sb-link.small{font-size:12px;padding:7px 12px 7px 14px;font-weight:500;}
-.sb-link.small .num{width:18px;height:18px;border-radius:5px;background:var(--gris-100);color:var(--gris-500);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.sb-link.small.done .num{background:var(--verde-bg);color:var(--verde);}
-.sb-link.active.small .num{background:var(--azul);color:var(--blanco);}
-.sb-user{padding:14px 22px;border-top:1px solid var(--gris-200);display:flex;align-items:center;gap:10px;}
-.sb-avatar{width:34px;height:34px;border-radius:50%;background:var(--azul);color:var(--blanco);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
-.sb-user-info{font-size:12.5px;flex:1;min-width:0;}
-.sb-user-info strong{display:block;color:var(--gris-800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sb-user-info span{color:var(--gris-400);font-size:11px;}
-.sb-user a{color:var(--gris-400);}
-.sb-user a:hover{color:var(--rojo);}
-
-.main{flex:1;background:var(--gris-50);min-width:0;}
-.main-header{background:var(--blanco);padding:16px 32px;border-bottom:1px solid var(--gris-200);display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:40px;z-index:10;}
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--gris-400);flex-wrap:wrap;}
-.breadcrumb a{color:var(--azul);text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;}
-.breadcrumb a:hover{text-decoration:underline;}
-.main-header-actions{display:flex;align-items:center;gap:14px;flex-shrink:0;}
-.hdr-icon-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gris-500);background:var(--gris-100);cursor:pointer;border:none;flex-shrink:0;}
-.hdr-icon-btn:hover{background:var(--gris-200);color:var(--gris-800);}
-.main-body{padding:32px;max-width:1240px;}
-.page-title{font-size:23px;font-weight:700;color:var(--gris-800);margin-bottom:6px;}
-.page-sub{font-size:14px;color:var(--gris-600);margin-bottom:26px;}
-
-/* cards */
-.card{background:var(--blanco);border-radius:var(--r-lg);border:1px solid var(--gris-200);box-shadow:var(--sh-sm);overflow:hidden;transition:all .18s;}
-.card:hover{box-shadow:var(--sh);}
-.card-pad{padding:24px;}
-.card-hover:hover{border-color:var(--azul);box-shadow:var(--sh-lg);transform:translateY(-2px);}
-.card-azul{background:var(--azul);color:var(--blanco);border:none;padding:28px;cursor:pointer;}
-.card-azul:hover{filter:brightness(.9);}
-.card-azul h3{font-size:16px;font-weight:700;}
-.card-azul p{font-size:12.5px;opacity:.82;margin-top:3px;}
-
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-.stat-card{padding:20px 22px;}
-.stat-card .stat-top{display:flex;align-items:center;justify-content:space-between;}
-.stat-card .stat-label{font-size:11.5px;font-weight:700;color:var(--gris-400);text-transform:uppercase;letter-spacing:.05em;}
-.stat-card .stat-icon{width:32px;height:32px;border-radius:9px;background:var(--azul-10);color:var(--azul);display:flex;align-items:center;justify-content:center;}
-.stat-card .stat-value{font-size:28px;font-weight:700;color:var(--gris-800);margin-top:6px;}
-.stat-card .stat-sub{font-size:12px;color:var(--gris-400);margin-top:2px;}
-
-.progress-bar{height:6px;background:var(--gris-200);border-radius:3px;overflow:hidden;}
-.progress-fill{height:100%;background:var(--azul);border-radius:3px;transition:width .3s;}
-.progress-fill.verde{background:var(--verde);}
-.progress-fill.amber{background:var(--amber);}
-
-/* hub cards (Contenido teórico / práctico) */
-.hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-.hub-grid.cols-2{grid-template-columns:repeat(2,1fr);}
-.hub-card{padding:32px 26px;border-radius:var(--r-lg);cursor:pointer;transition:all .18s;border:1px solid var(--gris-200);background:var(--blanco);}
-.hub-card:hover{box-shadow:var(--sh-lg);transform:translateY(-3px);border-color:var(--azul);}
-.hub-card-icon{width:52px;height:52px;border-radius:14px;background:var(--azul-10);color:var(--azul);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
-.hub-card h2{font-size:17px;font-weight:700;color:var(--gris-800);margin-bottom:6px;}
-.hub-card p{font-size:13px;color:var(--gris-600);margin-bottom:14px;}
-.hub-card .hub-meta{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--azul);}
-.hub-card.azul{background:var(--azul);color:var(--blanco);border-color:var(--azul);}
-.hub-card.azul h2{color:var(--blanco);}
-.hub-card.azul p{color:rgba(255,255,255,.7);}
-.hub-card.azul .hub-card-icon{background:rgba(255,255,255,.12);color:var(--blanco);}
-.hub-card.azul .hub-meta{color:var(--blanco);}
-
-/* toolbar (buscador/filtros) */
-.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
-.search-box{position:relative;flex:1;min-width:220px;max-width:360px;}
-.search-box .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gris-400);}
-.search-box input{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--gris-300);border-radius:var(--r-sm);font-family:var(--font);font-size:13.5px;background:var(--blanco);}
-.search-box input:focus{outline:none;border-color:var(--azul);box-shadow:0 0 0 3px var(--azul-10);}
-.filter-chip{padding:8px 14px;border-radius:999px;border:1px solid var(--gris-300);background:var(--blanco);font-size:12.5px;font-weight:600;color:var(--gris-600);cursor:pointer;}
-.filter-chip.active{background:var(--azul);border-color:var(--azul);color:var(--blanco);}
-
-/* temas grids */
-.temas-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
-.tema-tile{padding:16px 14px;border-radius:var(--r);cursor:pointer;border:1px solid var(--gris-200);background:var(--blanco);text-align:left;transition:all .15s;position:relative;}
-.tema-tile:hover{border-color:var(--azul);box-shadow:var(--sh);transform:translateY(-2px);}
-.tema-tile .tt-num{font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;}
-.tema-tile .tt-title{font-size:12.5px;font-weight:600;color:var(--gris-800);margin:5px 0 10px;line-height:1.35;min-height:34px;}
-.tema-tile .tt-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;}
-
-/* list temario descargable */
-.temario-list{display:flex;flex-direction:column;gap:1px;background:var(--gris-200);border:1px solid var(--gris-200);border-radius:var(--r-lg);overflow:hidden;}
-.temario-row{display:flex;align-items:center;gap:14px;padding:13px 18px;background:var(--blanco);font-size:13.5px;}
-.temario-row .tr-num{width:28px;height:28px;border-radius:8px;background:var(--gris-100);color:var(--gris-600);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.temario-row.done .tr-num{background:var(--verde-bg);color:var(--verde);}
-.temario-row .tr-title{flex:1;color:var(--gris-800);font-weight:500;}
-.temario-row .tr-actions{display:flex;align-items:center;gap:14px;flex-shrink:0;}
-.dl-link{display:inline-flex;align-items:center;gap:5px;color:var(--azul);font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;}
-.dl-link:hover{text-decoration:underline;}
-.group-head{padding:16px 18px 8px;font-size:11.5px;font-weight:700;color:var(--gris-400);text-transform:uppercase;letter-spacing:.06em;background:var(--gris-50);}
-
-/* tema individual */
-.tema-hero{background:var(--blanco);border:1px solid var(--gris-200);border-radius:var(--r-lg);padding:26px 28px;margin-bottom:22px;}
-.tema-hero .tema-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.tema-hero h1{font-size:20px;font-weight:700;color:var(--gris-800);line-height:1.35;}
-.subnav{display:flex;gap:4px;border-bottom:1px solid var(--gris-200);margin-bottom:24px;overflow-x:auto;}
-.subnav-tab{display:flex;align-items:center;gap:7px;padding:11px 16px;font-size:13.5px;font-weight:600;color:var(--gris-500);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
-.subnav-tab:hover{color:var(--gris-800);}
-.subnav-tab.active{color:var(--azul);border-bottom-color:var(--azul);}
-.tema-content{padding:30px 32px;font-size:14.5px;color:var(--gris-800);}
-.tema-content h2{font-size:17px;font-weight:700;margin:22px 0 10px;color:var(--gris-800);}
-.tema-content h2:first-child{margin-top:0;}
-.tema-content h3{font-size:14.5px;font-weight:700;margin:16px 0 6px;color:var(--gris-800);}
-.tema-content p{margin-bottom:10px;color:var(--gris-600);}
-.tema-content ul{margin:0 0 12px 20px;color:var(--gris-600);}
-.tema-content li{margin-bottom:4px;}
-.subtab-panel{display:none;}
-.subtab-panel.active{display:block;}
-
-.indice-list{list-style:none;}
-.indice-list li{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--gris-100);font-size:13.5px;color:var(--gris-700);cursor:pointer;}
-.indice-list li:hover{color:var(--azul);}
-.indice-list .ix-check{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--verde-bg);color:var(--verde);}
-
-.caso-card{background:var(--azul-05);border:1px solid var(--azul-light);border-radius:var(--r);padding:22px 24px;margin-bottom:20px;}
-.caso-card .caso-label{display:flex;align-items:center;gap:8px;color:var(--azul);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
-.caso-steps{counter-reset:paso;}
-.caso-step{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--gris-100);}
-.caso-step:last-child{border-bottom:none;}
-.caso-step-num{counter-increment:paso;width:26px;height:26px;border-radius:50%;background:var(--azul);color:var(--blanco);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.caso-step-num::before{content:counter(paso);}
-
-.dl-row{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid var(--gris-200);border-radius:var(--r);margin-bottom:10px;background:var(--blanco);}
-.dl-row .dl-icon{width:38px;height:38px;border-radius:9px;background:var(--rojo-bg);color:var(--rojo);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.dl-row .dl-icon.audio{background:var(--azul-10);color:var(--azul);}
-.dl-row .dl-icon.img{background:var(--amber-bg);color:var(--amber);}
-.dl-row .dl-info{flex:1;}
-.dl-row .dl-name{font-size:13.5px;font-weight:600;color:var(--gris-800);}
-.dl-row .dl-meta{font-size:11.5px;color:var(--gris-400);}
-
-/* test screen */
-.test-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
-.test-progress{font-size:13px;color:var(--gris-400);font-weight:600;}
-.test-timer{display:flex;align-items:center;gap:6px;background:var(--gris-800);color:var(--blanco);padding:9px 16px;border-radius:999px;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;}
-.question-card{padding:26px 28px;margin-bottom:16px;}
-.q-number{font-size:11.5px;font-weight:700;color:var(--gris-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-.q-text{font-size:15.5px;font-weight:600;color:var(--gris-800);margin-bottom:18px;line-height:1.5;}
-.q-options{display:flex;flex-direction:column;gap:9px;}
-.q-option{display:flex;align-items:center;gap:12px;padding:13px 16px;border:1.5px solid var(--gris-200);border-radius:var(--r-sm);font-size:13.5px;color:var(--gris-700);cursor:pointer;transition:all .12s;}
-.q-option:hover{border-color:var(--azul);background:var(--azul-05);}
-.q-option.selected{border-color:var(--azul);background:var(--azul-10);}
-.q-option.correct{border-color:var(--verde);background:var(--verde-bg);color:var(--verde);font-weight:600;}
-.q-option.wrong{border-color:var(--rojo);background:var(--rojo-bg);color:var(--rojo);font-weight:600;text-decoration:line-through;opacity:.75;}
-.q-letter{width:26px;height:26px;border-radius:50%;background:var(--gris-100);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:var(--gris-600);}
-.q-option.correct .q-letter{background:var(--verde);color:var(--blanco);}
-.q-option.wrong .q-letter{background:var(--rojo);color:var(--blanco);}
-.q-explanation{margin-top:16px;padding:14px 16px;background:var(--gris-50);border-radius:var(--r-sm);font-size:12.5px;color:var(--gris-600);border-left:3px solid var(--verde);}
-
-/* historial tables */
-.hist-table{width:100%;border-collapse:collapse;font-size:13px;}
-.hist-table thead th{text-align:left;padding:12px 16px;font-size:11px;font-weight:700;color:var(--gris-400);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--gris-200);}
-.hist-table tbody td{padding:13px 16px;border-bottom:1px solid var(--gris-100);color:var(--gris-700);}
-.hist-table tbody tr:last-child td{border-bottom:none;}
-.hist-table tbody tr{cursor:pointer;transition:background .12s;}
-.hist-table tbody tr:hover{background:var(--gris-50);}
-.hist-table .cell-nota{font-weight:700;font-variant-numeric:tabular-nums;}
-.hist-table .cell-action{color:var(--azul);font-weight:700;font-size:12px;white-space:nowrap;}
-
-/* result screen */
-.result-hero{display:flex;align-items:center;gap:28px;padding:32px;margin-bottom:24px;}
-.result-ring{width:104px;height:104px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
-.result-ring .rn{font-size:30px;font-weight:700;line-height:1;}
-.result-ring .rd{font-size:10.5px;color:var(--gris-400);margin-top:2px;}
-.result-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;flex:1;}
-.rb-item{text-align:center;padding:14px;border-radius:var(--r);background:var(--gris-50);}
-.rb-item .rb-num{font-size:22px;font-weight:700;}
-.rb-item .rb-lbl{font-size:11px;color:var(--gris-400);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
-.qlist{display:flex;flex-direction:column;gap:1px;background:var(--gris-200);border:1px solid var(--gris-200);border-radius:var(--r-lg);overflow:hidden;}
-.qlist-row{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--blanco);font-size:13px;}
-.qlist-row .ql-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.qlist-row .ql-icon.ok{background:var(--verde-bg);color:var(--verde);}
-.qlist-row .ql-icon.ko{background:var(--rojo-bg);color:var(--rojo);}
-.qlist-row .ql-icon.blank{background:var(--gris-100);color:var(--gris-400);}
-.qlist-row .ql-text{flex:1;color:var(--gris-700);}
-
-/* empty state */
-.empty-state{text-align:center;padding:48px 24px;color:var(--gris-400);}
-.empty-state .icon-lg{margin:0 auto 12px;color:var(--gris-300);width:40px;height:40px;}
-.empty-state p{font-size:13.5px;}
-
-/* radial mini progress (home widgets) */
-.chart-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.chart-bar:last-child{margin-bottom:0;}
-.chart-label{width:76px;font-size:12.5px;color:var(--gris-600);flex-shrink:0;font-weight:600;}
-.chart-track{flex:1;height:22px;background:var(--gris-100);border-radius:6px;overflow:hidden;position:relative;}
-.chart-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:var(--blanco);font-size:11px;font-weight:700;}
-.chart-fill.blue{background:var(--azul);}
-.chart-fill.dark{background:var(--gris-800);}
-.chart-fill.verde{background:var(--verde);}
-.chart-fill.amber{background:var(--amber);}
-.stats-section{margin-bottom:24px;}
-.stats-section h3{font-size:14px;font-weight:700;color:var(--gris-800);margin-bottom:12px;}
-
-@media (max-width:960px){
-  .l-features,.hub-grid,.stats-grid{grid-template-columns:repeat(2,1fr);}
-  .temas-grid{grid-template-columns:repeat(3,1fr);}
-  .l-ventajas-inner{grid-template-columns:1fr;}
-}
-</style>
-
-<!-- ══════════════════════════════════════════════════════════════════
-     SITEIMPROVE ANALYTICS — cuenta 6277594 (Ayuntamiento de Madrid)
-
-     Instalación estándar servida por Siteimprove, NO auto-alojada: así el
-     modo sin cookies y el registro de eventos se siguen configurando desde
-     el panel del IAM. Ver Documentacion/analitica-siteimprove-texto-ayuntamiento-v1.0.md
-     (punto 3 de «Qué necesitamos de vosotros»).
-
-     El guard de hostname sustituye a la variable de entorno que usaríamos en
-     la plataforma Next.js: aquí no hay build, así que se filtra en runtime
-     para no mandar visitas de file:// ni de localhost a la cuenta del IAM.
-     ══════════════════════════════════════════════════════════════════ -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temario TIC C1 · Ayuntamiento de Madrid</title>
+<meta name="description" content="Temario de los 40 temas de Técnico/a Auxiliar TIC del Ayuntamiento de Madrid, con test, casos prácticos y simulacros de examen.">
+<link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
 <script>
-(function(){
-  var h = location.hostname;
-  if (!h || h === 'localhost' || h === '127.0.0.1' || h === '[::1]') return;
-  var s = document.createElement('script');
-  s.async = true;
-  s.src = 'https://siteimproveanalytics.com/js/siteanalyze_6277594.js';
-  document.head.appendChild(s);
-})();
+/* Siteimprove Analytics (cuenta 6277594 del Ayuntamiento). No se carga en local. */
+(function(){var h=location.hostname;if(!h||h==='localhost'||h==='127.0.0.1'||h==='[::1]')return;
+var s=document.createElement('script');s.async=true;s.src='https://siteimproveanalytics.com/js/siteanalyze_6277594.js';document.head.appendChild(s);})();
 </script>
 </head>
-<body>
-
-<!-- DEMO TAB NAV -->
-<nav class="demo-nav">
-  <span class="tag">PROPUESTA VISUAL V3</span>
-  <button class="demo-tab active" onclick="showScreen('landing')">Landing</button>
-  <button class="demo-tab" onclick="showScreen('home')">Home</button>
-  <button class="demo-tab" onclick="showScreen('teorico')">Cont. teórico</button>
-  <button class="demo-tab" onclick="showScreen('temario')">Temario</button>
-  <button class="demo-tab" onclick="showScreen('parte1')">Parte I</button>
-  <button class="demo-tab" onclick="showScreen('parte2')">Parte II</button>
-  <button class="demo-tab" onclick="showScreen('tema')">Tema</button>
-  <button class="demo-tab" onclick="showScreen('test')">Test</button>
-  <button class="demo-tab" onclick="showScreen('practico')">Cont. práctico</button>
-  <button class="demo-tab" onclick="showScreen('simteo')">Simulacro teórico</button>
-  <button class="demo-tab" onclick="showScreen('simprac')">Simulacro práctico</button>
-  <button class="demo-tab" onclick="showScreen('extemas')">Exám. por temas</button>
-  <button class="demo-tab" onclick="showScreen('extema')">Examen tema</button>
-  <button class="demo-tab" onclick="showScreen('resultado')">Resultado</button>
-  <button class="demo-tab" onclick="showScreen('stats')">Estadísticas</button>
-</nav>
-
-<!-- ICON SPRITE -->
-<svg style="display:none">
+<body data-page="app" data-base="">
+<svg style="display:none" aria-hidden="true">
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol>
 <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 5c2-1 5-1 7 0v14c-2-1-5-1-7 0V5z"/><path d="M21 5c-2-1-5-1-7 0v14c2-1 5-1 7 0V5z"/></symbol>
-<symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><path d="M9 4h6"/></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><path d="M9 11l2 2 4-4"/></symbol>
 <symbol id="i-bar" viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></symbol>
-<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1116 0"/><path d="M12 18l4-6"/></symbol>
 <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></symbol>
-<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></symbol>
 <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></symbol>
 <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><circle cx="3.5" cy="6" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="3.5" cy="18" r="1.2"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></symbol>
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
-<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2c1 4-3 5-3 9a3 3 0 006 0c0-2-1-3-1-3s2 1 2 4a5 5 0 01-10 0c0-5 4-6 4-10z"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
 <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
-<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7V5z"/></symbol>
 <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></symbol>
 <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></symbol>
-<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 01-8 0V4z"/><path d="M6 5H4a2 2 0 002 4"/><path d="M18 5h2a2 2 0 01-2 4"/><path d="M10 15h4v3h-4z"/><path d="M8 21h8"/></symbol>
 <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></symbol>
-<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></symbol>
 <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></symbol>
-<symbol id="i-file-audio" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><circle cx="10" cy="16" r="1.6"/><path d="M11.6 16V9l4-1v6.5"/></symbol>
-<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 004 0"/></symbol>
-<symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5 15a8 8 0 0014 3M19 9a8 8 0 00-14-3"/></symbol>
-<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
-<symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M8.5 12.5L7 21l5-3 5 3-1.5-8.5"/></symbol>
+<symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.5"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></symbol>
 </svg>
+<a class="skip-link" href="#contenido-principal">Saltar al contenido principal</a>
+<header class="banda">
+  <div class="banda-inner">
+    <button type="button" class="menu-toggle" aria-label="Menú" aria-controls="sidebar" aria-expanded="false"><svg class="icon " aria-hidden="true"><use href="#i-menu"/></svg></button>
+    <img src="assets/img/firma.svg" alt="Ayuntamiento de Madrid" class="banda-logo" width="140" height="38">
+    <a class="banda-brand" href="#/inicio">Temario Técnico/a Auxiliar TIC</a>
+    <span class="banda-spacer"></span>
+    <a class="banda-link" href="https://ayuntamientomadrid.github.io/Procesos-selectivos-TIC/">Procesos selectivos TIC</a>
+  </div>
+</header>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: LANDING (pública)
-     ═══════════════════════════════════════ -->
-<div class="screen active" id="screen-landing">
-  <header class="l-header">
-    <div class="l-logo"><img src="assets/logo-madrid-azul.png" alt="Ayuntamiento de Madrid"></div>
-    <div class="l-header-links"><a href="#">Acceso</a></div>
-  </header>
-
+<!-- ═══ PRESENTACIÓN (portada pública) ═══ -->
+<main class="screen" id="screen-landing" tabindex="-1">
   <section class="l-hero">
-    <div class="l-hero-content">
-      <span class="l-plazas">📌 18 plazas convocadas — Turno libre (OEP 2025)</span>
+    <div class="l-inner">
+      <span class="l-tag">18 plazas · turno libre · Oferta de Empleo Público 2025</span>
       <h1>Técnico/a Auxiliar de Tecnologías de la Información y la Comunicación</h1>
-      <p>Conviértete en funcionario/a del Ayuntamiento de Madrid con una preparación inteligente, guiada y adaptada a ti.</p>
-      <div class="l-hero-btns">
-        <a href="#" class="btn btn-lg btn-white">Accede</a>
-        <a href="#" class="btn btn-lg btn-outline">Ver temario</a>
+      <p>Temario de los 40 temas del programa de la convocatoria (BOAM n.º 10.032, de 23 de diciembre de 2025), con test de autoevaluación, casos prácticos y simulacros con el formato del examen.</p>
+      <div class="l-btns">
+        <a href="#/progreso" class="btn btn-lg btn-blanco">Empezar a estudiar</a>
+        <a href="#/temario" class="btn btn-lg btn-borde">Ver el temario</a>
       </div>
-      <div class="l-trust">
-        <div><strong>18</strong>plazas convocadas</div>
-        <div><strong>40</strong>temas del temario</div>
-        <div><strong>120</strong>preguntas de examen</div>
+      <div class="l-datos">
+        <div><strong>40</strong>temas del programa</div>
+        <div><strong>3.290</strong>preguntas de test</div>
+        <div><strong>90 + 30</strong>preguntas en el examen</div>
       </div>
     </div>
   </section>
 
   <section class="l-section">
-    <div class="l-section-head">
-      <div class="l-eyebrow">Por qué eTrivium</div>
-      <h2>¿Qué te ofrecemos?</h2>
-      <p class="lede">Todo lo que necesitas para preparar la oposición sin dispersarte: contenido oficial, ritmo guiado y simulacros con formato real de examen.</p>
-    </div>
-    <div class="l-features">
-      <div class="l-feat">
-        <div class="l-feat-icon"><svg class="icon"><use href="#i-book"/></svg></div>
-        <h3>Contenido 100% adaptado</h3>
-        <p>Material alineado con la convocatoria oficial del Ayuntamiento de Madrid (BOAM 10.032)</p>
-      </div>
-      <div class="l-feat">
-        <div class="l-feat-icon"><svg class="icon"><use href="#i-target"/></svg></div>
-        <h3>Estudio guiado paso a paso</h3>
-        <p>Avanza por el temario con indicadores de progreso y retoma justo donde lo dejaste</p>
-      </div>
-      <div class="l-feat">
-        <div class="l-feat-icon"><svg class="icon"><use href="#i-clipboard"/></svg></div>
-        <h3>Simulacros tipo examen</h3>
-        <p>90 preguntas teóricas + 30 prácticas con formato oficial A/B/C y corrección al instante</p>
-      </div>
-      <div class="l-feat">
-        <div class="l-feat-icon"><svg class="icon"><use href="#i-clock"/></svg></div>
-        <h3>Optimiza tu tiempo</h3>
-        <p>Estadísticas por tema para saber exactamente dónde necesitas reforzar</p>
+    <div class="l-inner">
+      <h2>Qué encontrarás</h2>
+      <p class="lede">Todo el material está organizado según el programa oficial: 10 temas del Grupo I (administrativo) y 30 del Grupo II (técnico).</p>
+      <div class="l-features">
+        <div class="card l-feat"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></div><h3>Los 40 temas</h3><p>Cada tema con índice, contenido, diagramas, fuentes y una ficha con su extensión y el tiempo estimado de estudio.</p></div>
+        <div class="card l-feat"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg></div><h3>Test y casos prácticos</h3><p>Un banco de preguntas por tema, con la explicación de cada respuesta, y supuestos aplicados al Ayuntamiento de Madrid.</p></div>
+        <div class="card l-feat"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></div><h3>Simulacros de examen</h3><p>Parte teórica (90 preguntas en 90 minutos) y parte práctica (30 preguntas en 60 minutos), corregidas como en el examen.</p></div>
+        <div class="card l-feat"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-gauge"/></svg></div><h3>Tu progreso</h3><p>Marca los epígrafes que vas estudiando, revisa tus intentos e imprime cada tema con tu avance.</p></div>
       </div>
     </div>
   </section>
 
-  <section class="l-ventajas">
-    <div class="l-ventajas-inner">
-      <div>
-        <div class="l-eyebrow">La oportunidad</div>
-        <h2 style="font-size:26px;font-weight:700;color:var(--gris-800);margin-bottom:14px">Tu oportunidad empieza ahora</h2>
-        <p style="color:var(--gris-600);font-size:14.5px">El Ayuntamiento de Madrid ha convocado 18 plazas de Técnico/a Auxiliar TIC, una de las oposiciones con mayor proyección en el ámbito tecnológico público.</p>
+  <section class="l-section gris" aria-labelledby="proc-titulo">
+    <div class="l-inner">
+      <h2 id="proc-titulo">Cómo se ha elaborado este material</h2>
+      <p class="lede">Los contenidos han sido elaborados por eTrivium para el Ayuntamiento de Madrid con el apoyo de herramientas de inteligencia artificial, y revisados y validados por personal técnico del Ayuntamiento antes de su publicación.</p>
+      <div class="l-proc">
+        <div class="card"><h3>Fuentes oficiales</h3><p>Cada tema se apoya en la normativa vigente y en los estándares y la documentación técnica de referencia, que se citan en su pestaña «Fuentes».</p></div>
+        <div class="card"><h3>Revisión por el Ayuntamiento</h3><p>Los 40 temas han sido revisados por el Ayuntamiento de Madrid, que ha dado su conformidad a su contenido.</p></div>
+        <div class="card"><h3>Material de apoyo</h3><p>Es una herramienta de estudio: no sustituye a las bases de la convocatoria ni a los textos oficiales, y el examen puede incluir preguntas sobre aspectos del programa que no figuren aquí de forma literal.</p></div>
       </div>
-      <div class="l-ventajas-grid">
-        <div class="l-vent"><div class="l-vent-check"><svg class="icon"><use href="#i-check"/></svg></div><span>Estabilidad laboral</span></div>
-        <div class="l-vent"><div class="l-vent-check"><svg class="icon"><use href="#i-check"/></svg></div><span>Desarrollo profesional en tecnología</span></div>
-        <div class="l-vent"><div class="l-vent-check"><svg class="icon"><use href="#i-check"/></svg></div><span>Trabajo en el sector público</span></div>
-        <div class="l-vent"><div class="l-vent-check"><svg class="icon"><use href="#i-check"/></svg></div><span>Impacto real en la ciudad de Madrid</span></div>
-      </div>
+      <p class="l-nota">Contenido actualizado a octubre de 2026. Si detectas un error o quieres proponer una mejora, escribe al <a href="mailto:procesosselectivostic@madrid.es" data-buzon>buzón de sugerencias</a>.</p>
     </div>
   </section>
 
-  <section class="l-cta">
-    <h2>¿Empezamos?</h2>
-    <div class="l-cta-btns">
-      <a href="#" class="btn btn-lg btn-ghost">Información convocatoria</a>
-      <a href="#" class="btn btn-lg btn-azul" onclick="showScreen('temario');return false;">Ver temario</a>
+  <section class="l-section" aria-labelledby="priv-titulo">
+    <div class="l-inner">
+      <h2 id="priv-titulo">Sin registro y sin datos personales</h2>
+      <p class="lede">No necesitas crear una cuenta. Tu avance y tus resultados se guardan solo en el navegador que uses: si cambias de navegador o de dispositivo, o borras los datos de navegación, no se conservan. Puedes borrarlos tú mismo en «Estadísticas».</p>
+      <div class="l-btns">
+        <a href="#/progreso" class="btn btn-lg btn-azul">Empezar a estudiar</a>
+        <a href="https://ayuntamientomadrid.github.io/Procesos-selectivos-TIC/" class="btn btn-lg btn-ghost">Información de la convocatoria</a>
+      </div>
     </div>
   </section>
+</main>
 
-  <footer class="banda-corporativa">
-    <div class="banda-inner">
-      <img class="banda-logo" src="assets/logo-madrid-blanco.png" alt="Ayuntamiento de Madrid">
-      <span class="banda-tagline">Donde se cruzan los caminos</span>
-    </div>
-  </footer>
-</div>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Navegación">
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div><a class="sb-link" data-nav="progreso" href="#/progreso"><svg class="icon " aria-hidden="true"><use href="#i-gauge"/></svg> Mi progreso</a><a class="sb-link" data-nav="temario" href="#/temario"><svg class="icon " aria-hidden="true"><use href="#i-book"/></svg> Temario</a><a class="sb-link" data-nav="test" href="#/test"><svg class="icon " aria-hidden="true"><use href="#i-clipboard"/></svg> Test</a><a class="sb-link" data-nav="stats" href="#/estadisticas"><svg class="icon " aria-hidden="true"><use href="#i-bar"/></svg> Estadísticas</a>
+      <div class="sb-section">Información</div>
+      <a class="sb-link" href="#/inicio"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg> Presentación</a>
+    </nav>
+  </aside>
+  <div class="overlay"></div>
+  <main class="main" id="contenido-principal" tabindex="-1">
 
-<!-- ═══════════════════════════════════════
-     SCREEN: HOME (autenticado)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-home">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="home"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <span>Inicio</span></div>
-        <div class="main-header-actions">
-          <button class="hdr-icon-btn"><svg class="icon"><use href="#i-search"/></svg></button>
-          <button class="hdr-icon-btn"><svg class="icon"><use href="#i-bell"/></svg></button>
-        </div>
-      </div>
+    <!-- ═══ MI PROGRESO ═══ -->
+    <section class="screen" id="screen-progreso" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><span aria-current="page">Mi progreso</span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Bienvenido/a, Joan</h1>
-        <p class="page-sub">Llevas 5 días seguidos estudiando. Aquí tienes tu progreso.</p>
-
-        <div class="stats-grid">
-          <div class="card stat-card">
-            <div class="stat-top"><span class="stat-label">Temas completados</span><span class="stat-icon"><svg class="icon"><use href="#i-book"/></svg></span></div>
-            <div class="stat-value">8 <span style="font-size:14px;color:var(--gris-400);font-weight:600">/ 40</span></div>
-            <div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:20%"></div></div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-top"><span class="stat-label">Simulacros realizados</span><span class="stat-icon"><svg class="icon"><use href="#i-clipboard"/></svg></span></div>
-            <div class="stat-value">12</div>
-            <div class="stat-sub">6 teóricos + 6 prácticos</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-top"><span class="stat-label">Nota media</span><span class="stat-icon"><svg class="icon"><use href="#i-target"/></svg></span></div>
-            <div class="stat-value" style="color:var(--verde)">7.2</div>
-            <div class="stat-sub">sobre 10</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-top"><span class="stat-label">Racha de estudio</span><span class="stat-icon"><svg class="icon"><use href="#i-flame"/></svg></span></div>
-            <div class="stat-value">5 <span style="font-size:13px;color:var(--gris-400);font-weight:600">días</span></div>
-            <div class="stat-sub">🔥 ¡Sigue así!</div>
-          </div>
-        </div>
-
-        <div class="card card-pad" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:16px">
-            <div class="stat-icon" style="width:44px;height:44px"><svg class="icon"><use href="#i-play"/></svg></div>
-            <div>
-              <div style="font-size:11.5px;font-weight:700;color:var(--gris-400);text-transform:uppercase;letter-spacing:.05em">Continuar donde lo dejaste</div>
-              <div style="font-size:15px;font-weight:700;color:var(--gris-800);margin-top:2px">Tema 15 · Sistemas gestores de bases de datos</div>
-              <div class="progress-bar" style="width:220px;margin-top:8px"><div class="progress-fill amber" style="width:40%"></div></div>
-            </div>
-          </div>
-          <button class="btn btn-azul" onclick="showScreen('tema')">Continuar <svg class="icon"><use href="#i-arrow-right"/></svg></button>
-        </div>
-
+        <div class="aviso" role="note"><svg class="icon " aria-hidden="true"><use href="#i-info"/></svg><p><strong>Tu progreso se guarda solo en este navegador.</strong> No hace falta registrarse y no se recoge ningún dato personal. Si cambias de navegador o de dispositivo, o borras los datos de navegación, el progreso no se conserva; puedes imprimir cada tema con tu avance.</p><button type="button">Entendido</button></div>
+        <h1 class="page-title">Mi progreso</h1>
+        <p class="page-sub">Tu avance en el temario y en los test, guardado en este navegador.</p>
+        <div class="stats-grid" id="prog-stats"></div>
+        <div id="prog-continuar" style="margin-bottom:24px"></div>
         <div class="hub-grid cols-2">
-          <div class="hub-card card-hover" onclick="showScreen('teorico')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-book"/></svg></div>
-            <h2>Contenido teórico</h2>
-            <p>Temario completo: 40 temas con índice, contenido, test final, caso práctico y descargas</p>
-            <div class="hub-meta">Ir al temario <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
-          <div class="hub-card card-hover" onclick="showScreen('practico')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-clipboard"/></svg></div>
-            <h2>Contenido práctico</h2>
-            <p>Simulacros tipo examen, exámenes por temas y todo tu historial de intentos</p>
-            <div class="hub-meta">Ir a la práctica <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
+          <a class="card card-link hub-card" href="#/temario"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></div><h2>Temario</h2><p>Los 40 temas en fichas, por bloques, con tu avance en cada uno.</p><div class="hub-meta">Ir al temario <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></div></a>
+          <a class="card card-link hub-card" href="#/test"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"/></svg></div><h2>Test</h2><p>Simulacros con el formato del examen y exámenes cortos por tema, con su historial.</p><div class="hub-meta">Ir a Test <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></div></a>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: CONTENIDO TEÓRICO (hub)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-teorico">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="teorico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <span>Contenido teórico</span></div>
-      </div>
+    <!-- ═══ TEMARIO ═══ -->
+    <section class="screen" id="screen-temario" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <span aria-current="page">Temario</span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Contenido teórico</h1>
-        <p class="page-sub">40 temas divididos en dos bloques, tal y como marca la convocatoria oficial.</p>
-        <div class="hub-grid">
-          <div class="hub-card azul card-hover" onclick="showScreen('temario')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-file-text"/></svg></div>
-            <h2>Temario completo</h2>
-            <p>Listado de los 40 temas con descarga en PDF, individual o completo</p>
-            <div class="hub-meta">Ver listado <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
-          <div class="hub-card card-hover" onclick="showScreen('parte1')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-briefcase"/></svg></div>
-            <h2>Parte I · Administrativo</h2>
-            <p>Temas 1-10 · Constitución, régimen jurídico y organización municipal</p>
-            <div class="hub-meta">4 / 10 completados <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
-          <div class="hub-card card-hover" onclick="showScreen('parte2')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-folder"/></svg></div>
-            <h2>Parte II · Técnico</h2>
-            <p>Temas 11-40 · Informática, bases de datos, redes y seguridad</p>
-            <div class="hub-meta">4 / 30 completados <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     SCREEN: TEMARIO (listado completo descargable)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-temario">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="teorico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('teorico')">Contenido teórico</a> <span>›</span> <span>Temario</span></div>
-      </div>
-      <div class="main-body">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
-          <div>
-            <h1 class="page-title">Temario completo</h1>
-            <p class="page-sub">40 temas · convocatoria BOAM 10.032 (23-dic-2025)</p>
-          </div>
-          <button class="btn btn-azul"><svg class="icon"><use href="#i-download"/></svg> Descargar temario completo (ZIP)</button>
-        </div>
+        <h1 class="page-title">Temario</h1>
+        <p class="page-sub">40 temas del programa (BOAM n.º 10.032). Cada ficha abre el tema con su índice, contenido, diagramas, test, casos y fuentes.</p>
         <div class="toolbar">
-          <div class="search-box"><svg class="icon"><use href="#i-search"/></svg><input type="text" placeholder="Buscar un tema…"></div>
-          <button class="filter-chip active">Todos</button>
-          <button class="filter-chip">Bloque I</button>
-          <button class="filter-chip">Bloque II</button>
-          <button class="filter-chip">Pendientes</button>
+          <div class="search-box"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="temario-q" placeholder="Buscar un tema…" aria-label="Buscar un tema"></div>
+          <button type="button" class="chip" data-f="todos" aria-pressed="true">Todos</button>
+          <button type="button" class="chip" data-f="I" aria-pressed="false">Bloque I</button>
+          <button type="button" class="chip" data-f="II" aria-pressed="false">Bloque II</button>
+          <button type="button" class="chip" data-f="pendientes" aria-pressed="false">Pendientes</button>
         </div>
-        <div id="temario-list"></div>
+        <div id="temario-fichas"></div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: PARTE I (temas 1-10)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-parte1">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="teorico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('teorico')">Contenido teórico</a> <span>›</span> <span>Parte I</span></div>
-      </div>
+    <!-- ═══ TEST (hub) ═══ -->
+    <section class="screen" id="screen-test" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <span aria-current="page">Test</span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Parte I · Bloque Administrativo</h1>
-        <p class="page-sub">Temas 1-10 · 90 preguntas teóricas comparten examen con el Bloque Técnico</p>
-        <div class="temas-grid" id="grid-parte1"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     SCREEN: PARTE II (temas 11-40)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-parte2">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="teorico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('teorico')">Contenido teórico</a> <span>›</span> <span>Parte II</span></div>
-      </div>
-      <div class="main-body">
-        <h1 class="page-title">Parte II · Bloque Técnico</h1>
-        <p class="page-sub">Temas 11-40 · además de la parte teórica, examen práctico de 30 preguntas</p>
-        <div class="temas-grid" id="grid-parte2"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     SCREEN: TEMA INDIVIDUAL
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-tema">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="tema" data-tema="11" data-active="contenido"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb">
-          <a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span>
-          <a onclick="showScreen('teorico')">Contenido teórico</a> <span>›</span>
-          <a onclick="showScreen('parte2')">Parte II</a> <span>›</span> <span>Tema 11</span>
-        </div>
-      </div>
-      <div class="main-body">
-        <div class="tema-hero">
-          <div class="tema-eyebrow"><span class="badge badge-azul">Tema 11 · Parte II</span> <span class="badge badge-verde"><svg class="icon"><use href="#i-check"/></svg> Completado</span></div>
-          <h1>Informática básica. Representación y comunicación de la información</h1>
-        </div>
-
-        <div id="tema-panels">
-          <div class="subtab-panel active" data-panel="indice">
-            <div class="card card-pad">
-              <ul class="indice-list">
-                <li onclick="setTemaTab('contenido')"><span class="ix-check"><svg class="icon"><use href="#i-check"/></svg></span> 1. Conceptos fundamentales de informática</li>
-                <li onclick="setTemaTab('contenido')"><span class="ix-check"><svg class="icon"><use href="#i-check"/></svg></span> 1.1 Dato vs Información</li>
-                <li onclick="setTemaTab('contenido')"><span class="ix-check"><svg class="icon"><use href="#i-check"/></svg></span> 1.2 Sistemas de representación (binario, octal, hexadecimal)</li>
-                <li onclick="setTemaTab('contenido')"><span class="ix-check"><svg class="icon"><use href="#i-check"/></svg></span> 2. Unidades de medida de información</li>
-                <li onclick="setTemaTab('contenido')"><span class="ix-check"><svg class="icon"><use href="#i-check"/></svg></span> 3. Arquitectura de ordenadores: elementos constitutivos</li>
-                <li onclick="setTemaTab('contenido')"><span class="ix-check"><svg class="icon"><use href="#i-check"/></svg></span> 4. Componentes internos de equipos microinformáticos</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="subtab-panel" data-panel="contenido">
-            <div class="card">
-              <div class="tema-content">
-                <h2>1. Conceptos fundamentales de informática</h2>
-                <p>La informática es la ciencia que estudia el tratamiento automático de la información mediante sistemas computacionales.</p>
-                <h3>1.1 Dato vs Información</h3>
-                <p><strong>Dato:</strong> representación simbólica de un hecho o concepto; por sí solo carece de significado contextual. Ejemplo: "42".</p>
-                <p><strong>Información:</strong> resultado de procesar y contextualizar datos, aportando conocimiento útil para la toma de decisiones.</p>
-                <h3>1.2 Sistemas de representación</h3>
-                <ul>
-                  <li><strong>Sistema binario (base 2):</strong> utiliza los dígitos 0 y 1. Es la base del funcionamiento de los ordenadores.</li>
-                  <li><strong>Sistema octal (base 8):</strong> utiliza dígitos del 0 al 7.</li>
-                  <li><strong>Sistema hexadecimal (base 16):</strong> utiliza dígitos 0-9 y letras A-F.</li>
-                </ul>
-                <h2>2. Unidades de medida de información</h2>
-                <p>La unidad mínima de información es el <strong>bit</strong> (binary digit), que puede tomar dos valores: 0 o 1.</p>
-                <div style="background:var(--azul-05);padding:16px 18px;border-radius:10px;margin:16px 0">
-                  <strong style="color:var(--azul);font-size:13px">Tabla de conversiones</strong>
-                  <p style="font-size:13px;margin-top:6px">1 Byte = 8 bits · 1 KB = 1.024 Bytes · 1 MB = 1.024 KB · 1 GB = 1.024 MB · 1 TB = 1.024 GB</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="subtab-panel" data-panel="caso">
-            <div class="caso-card">
-              <div class="caso-label"><svg class="icon"><use href="#i-briefcase"/></svg> Supuesto práctico</div>
-              <p style="font-size:14px;color:var(--gris-700)">El departamento de Sistemas del distrito de Chamberí necesita renovar 12 puestos de trabajo y estimar la capacidad de almacenamiento necesaria para los próximos 3 años, además de justificar la elección de componentes ante Intervención.</p>
-            </div>
-            <div class="card card-pad">
-              <div class="caso-steps">
-                <div class="caso-step"><div class="caso-step-num"></div><div><strong>Estimar el volumen de datos.</strong> Cada puesto genera ~2 GB/mes de documentación. Calcula la necesidad de almacenamiento a 3 años para los 12 puestos.</div></div>
-                <div class="caso-step"><div class="caso-step-num"></div><div><strong>Elegir unidad de medida correcta.</strong> Justifica si el resultado debe expresarse en GB o TB, aplicando el sistema binario (1.024).</div></div>
-                <div class="caso-step"><div class="caso-step-num"></div><div><strong>Redactar la memoria técnica.</strong> Describe los componentes internos mínimos recomendados (CPU, RAM, almacenamiento) para el perfil de uso ofimático descrito.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="subtab-panel" data-panel="descargas">
-            <div class="dl-row"><div class="dl-icon"><svg class="icon"><use href="#i-file-text"/></svg></div><div class="dl-info"><div class="dl-name">Tema 11 completo</div><div class="dl-meta">PDF · 1,8 MB</div></div><button class="btn btn-sm btn-ghost"><svg class="icon"><use href="#i-download"/></svg> Descargar</button></div>
-            <div class="dl-row"><div class="dl-icon"><svg class="icon"><use href="#i-file-text"/></svg></div><div class="dl-info"><div class="dl-name">Resumen esquemático</div><div class="dl-meta">PDF · 340 KB</div></div><button class="btn btn-sm btn-ghost"><svg class="icon"><use href="#i-download"/></svg> Descargar</button></div>
-            <div class="dl-row"><div class="dl-icon audio"><svg class="icon"><use href="#i-file-audio"/></svg></div><div class="dl-info"><div class="dl-name">Audio-resumen</div><div class="dl-meta">MP3 · 12 min</div></div><button class="btn btn-sm btn-ghost"><svg class="icon"><use href="#i-download"/></svg> Descargar</button></div>
-            <div class="dl-row"><div class="dl-icon img"><svg class="icon"><use href="#i-folder"/></svg></div><div class="dl-info"><div class="dl-name">Mapa mental del tema</div><div class="dl-meta">PNG · 620 KB</div></div><button class="btn btn-sm btn-ghost"><svg class="icon"><use href="#i-download"/></svg> Descargar</button></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     SCREEN: TEST (Test final de un tema)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-test">
-  <div class="app">
-    <aside class="sidebar">
-      <div class="sb-header"><img src="assets/logo-madrid-azul.png" alt="Ayuntamiento de Madrid"></div>
-      <nav class="sb-nav">
-        <div class="sb-section">Test · Tema 11</div>
-        <a class="sb-link active"><svg class="icon"><use href="#i-check-circle"/></svg> Pregunta actual</a>
-        <div style="padding:14px 12px;font-size:12.5px;color:var(--gris-500);line-height:1.9">
-          Preguntas: <strong>3 / 15</strong><br>
-          Correctas: <strong style="color:var(--verde)">2</strong><br>
-          Incorrectas: <strong style="color:var(--rojo)">1</strong>
-        </div>
-      </nav>
-    </aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb">
-          <a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span>
-          <a onclick="showScreen('tema')">Tema 11</a> <span>›</span> <span>Test final</span>
-        </div>
-      </div>
-      <div class="main-body">
-        <div class="test-header">
-          <div><h1 class="page-title" style="margin-bottom:2px">Test Final · Tema 11</h1><div class="test-progress">Pregunta 3 de 15</div></div>
-          <div class="test-timer"><svg class="icon"><use href="#i-clock"/></svg> 12:34</div>
-        </div>
-        <div class="progress-bar" style="margin-bottom:24px"><div class="progress-fill" style="width:20%"></div></div>
-
-        <div class="card question-card">
-          <div class="q-number">Pregunta 3</div>
-          <div class="q-text">¿Cuál es la unidad mínima de información en un sistema informático?</div>
-          <div class="q-options">
-            <div class="q-option wrong"><div class="q-letter">A</div><span>Byte</span></div>
-            <div class="q-option correct"><div class="q-letter">B</div><span>Bit</span></div>
-            <div class="q-option"><div class="q-letter">C</div><span>Nibble</span></div>
-          </div>
-          <div class="q-explanation"><strong style="color:var(--gris-800)">Respuesta correcta: B.</strong> El bit (binary digit) es la unidad mínima de información, representando un valor binario (0 o 1). Un byte está compuesto por 8 bits, y un nibble por 4 bits.</div>
-        </div>
-
-        <div class="card question-card">
-          <div class="q-number">Pregunta 4</div>
-          <div class="q-text">¿Cuántos bytes componen un Kilobyte (KB) según el sistema binario?</div>
-          <div class="q-options">
-            <div class="q-option"><div class="q-letter">A</div><span>1.000 bytes</span></div>
-            <div class="q-option selected"><div class="q-letter">B</div><span>1.024 bytes</span></div>
-            <div class="q-option"><div class="q-letter">C</div><span>512 bytes</span></div>
-          </div>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;margin-top:24px">
-          <button class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg> Anterior</button>
-          <button class="btn btn-azul" onclick="showScreen('resultado')">Siguiente <svg class="icon"><use href="#i-arrow-right"/></svg></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     SCREEN: CONTENIDO PRÁCTICO (hub)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-practico">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="practico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <span>Contenido práctico</span></div>
-      </div>
-      <div class="main-body">
-        <h1 class="page-title">Contenido práctico</h1>
-        <p class="page-sub">Practica en condiciones de examen o refuerza tema a tema.</p>
+        <h1 class="page-title">Test</h1>
+        <p class="page-sub">El examen es un único ejercicio tipo test con dos partes. Cada pregunta tiene tres respuestas y solo una es correcta; los errores restan 1/3 de acierto y para aprobar hacen falta 5 puntos en cada parte.</p>
         <div class="hub-grid">
-          <div class="hub-card azul card-hover" onclick="showScreen('simteo')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-clipboard"/></svg></div>
-            <h2>Simulacro parte teórica</h2>
-            <p>90 preguntas (Bloque I + II) en 90 minutos, formato oficial A/B/C</p>
-            <div class="hub-meta">6 intentos realizados <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
-          <div class="hub-card card-hover" onclick="showScreen('simprac')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-target"/></svg></div>
-            <h2>Simulacro parte práctica</h2>
-            <p>30 preguntas (solo Bloque II) en 60 minutos, formato oficial A/B/C</p>
-            <div class="hub-meta">6 intentos realizados <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
-          <div class="hub-card card-hover" onclick="showScreen('extemas')">
-            <div class="hub-card-icon"><svg class="icon"><use href="#i-book"/></svg></div>
-            <h2>Exámenes por temas</h2>
-            <p>Elige un tema y haz un test corto para reforzar justo lo que necesitas</p>
-            <div class="hub-meta">40 temas disponibles <svg class="icon"><use href="#i-chevron-right"/></svg></div>
-          </div>
+          <a class="card card-link hub-card azul" href="#/simulacro-teorico"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"/></svg></div><h2>Simulacro · parte teórica</h2><p>90 preguntas de los 40 temas en 90 minutos.</p><div class="hub-meta"><span id="hub-simteo"></span> <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></div></a>
+          <a class="card card-link hub-card" href="#/simulacro-practico"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></div><h2>Simulacro · parte práctica</h2><p>Un supuesto con 30 preguntas del Grupo II en 60 minutos.</p><div class="hub-meta"><span id="hub-simprac"></span> <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></div></a>
+          <a class="card card-link hub-card" href="#/examenes"><div class="hub-icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></div><h2>Exámenes por tema</h2><p>15 preguntas al azar de un tema en 15 minutos, para reforzar lo que acabas de estudiar.</p><div class="hub-meta"><span id="hub-extemas"></span> <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></div></a>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: SIMULACRO PARTE TEÓRICA
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-simteo">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="practico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('practico')">Contenido práctico</a> <span>›</span> <span>Simulacro parte teórica</span></div>
-      </div>
+    <!-- ═══ SIMULACRO TEÓRICO ═══ -->
+    <section class="screen" id="screen-simteo" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <a href="#/test">Test</a> <span aria-hidden="true">›</span> <span aria-current="page">Simulacro · parte teórica</span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Simulacro · Parte Teórica</h1>
-        <p class="page-sub">90 preguntas tipo test (A/B/C) en condiciones de examen real. Tiempo limitado.</p>
-
-        <div class="card card-azul" style="margin-bottom:32px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
-          <div><h3 style="font-size:19px">Iniciar nuevo simulacro</h3><p>90 preguntas · 90 minutos · Formato oficial</p></div>
-          <button class="btn btn-lg btn-white"><svg class="icon"><use href="#i-play"/></svg> Empezar</button>
+        <h1 class="page-title">Simulacro · parte teórica</h1>
+        <p class="page-sub">Como la parte teórica del examen: 90 preguntas del Grupo I y del Grupo II en 90 minutos. Se eligen al azar del banco de los 40 temas (dos de cada tema y diez más), así que cada simulacro es distinto.</p>
+        <div class="card hub-card azul" style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+          <div><h2 style="margin:0">Nuevo simulacro</h2><p style="margin:4px 0 0">90 preguntas · 90 minutos · se entrega solo al acabar el tiempo</p></div>
+          <button type="button" class="btn btn-lg btn-blanco btn-empezar" data-empezar="simteo"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Empezar</button>
         </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <h3 style="font-size:14px;font-weight:700;color:var(--gris-800)">Simulacros anteriores</h3>
-          <span class="badge badge-gris">48 intentos en total</span>
-        </div>
-        <div class="card" style="overflow-x:auto">
-          <table class="hist-table">
-            <thead><tr><th>Intento</th><th>Fecha</th><th>Duración</th><th>Aciertos</th><th>Nota</th><th>Estado</th><th></th></tr></thead>
-            <tbody id="hist-simteo"></tbody>
-          </table>
-        </div>
-        <div style="text-align:center;margin-top:16px"><button class="btn btn-ghost btn-sm">Ver los 48 intentos <svg class="icon"><use href="#i-chevron-right"/></svg></button></div>
+        <h2 class="section-title">Simulacros anteriores</h2>
+        <div class="card" style="overflow-x:auto"><table class="hist-table"><thead><tr><th scope="col">Fecha</th><th scope="col">Duración</th><th scope="col">Aciertos</th><th scope="col">Nota</th><th scope="col">Resultado</th><th scope="col"><span class="visually-hidden">Revisión</span></th></tr></thead><tbody id="hist-simteo"></tbody></table></div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: SIMULACRO PARTE PRÁCTICA
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-simprac">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="practico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('practico')">Contenido práctico</a> <span>›</span> <span>Simulacro parte práctica</span></div>
-      </div>
+    <!-- ═══ SIMULACRO PRÁCTICO ═══ -->
+    <section class="screen" id="screen-simprac" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <a href="#/test">Test</a> <span aria-hidden="true">›</span> <span aria-current="page">Simulacro · parte práctica</span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Simulacro · Parte Práctica</h1>
-        <p class="page-sub">30 preguntas (solo Bloque Técnico) en condiciones de examen real. Tiempo limitado.</p>
-
-        <div class="card card-azul" style="margin-bottom:32px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
-          <div><h3 style="font-size:19px">Iniciar nuevo simulacro</h3><p>30 preguntas · 60 minutos · Formato oficial</p></div>
-          <button class="btn btn-lg btn-white"><svg class="icon"><use href="#i-play"/></svg> Empezar</button>
+        <h1 class="page-title">Simulacro · parte práctica</h1>
+        <p class="page-sub">Como la parte práctica del examen: un supuesto de un proyecto del Ayuntamiento y 30 preguntas sobre el temario del Grupo II, en 60 minutos. Las preguntas piden aplicar los conocimientos al caso, no solo recordarlos.</p>
+        <div class="card hub-card azul" style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+          <div><h2 style="margin:0">Nuevo simulacro</h2><p style="margin:4px 0 0">1 supuesto · 30 preguntas · 60 minutos</p></div>
+          <button type="button" class="btn btn-lg btn-blanco btn-empezar" data-empezar="simprac"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Empezar</button>
         </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <h3 style="font-size:14px;font-weight:700;color:var(--gris-800)">Simulacros anteriores</h3>
-          <span class="badge badge-gris">31 intentos en total</span>
-        </div>
-        <div class="card" style="overflow-x:auto">
-          <table class="hist-table">
-            <thead><tr><th>Intento</th><th>Fecha</th><th>Duración</th><th>Aciertos</th><th>Nota</th><th>Estado</th><th></th></tr></thead>
-            <tbody id="hist-simprac"></tbody>
-          </table>
-        </div>
-        <div style="text-align:center;margin-top:16px"><button class="btn btn-ghost btn-sm">Ver los 31 intentos <svg class="icon"><use href="#i-chevron-right"/></svg></button></div>
+        <h2 class="section-title">Simulacros anteriores</h2>
+        <div class="card" style="overflow-x:auto"><table class="hist-table"><thead><tr><th scope="col">Fecha</th><th scope="col">Duración</th><th scope="col">Aciertos</th><th scope="col">Nota</th><th scope="col">Resultado</th><th scope="col"><span class="visually-hidden">Revisión</span></th></tr></thead><tbody id="hist-simprac"></tbody></table></div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: EXÁMENES POR TEMAS (selector)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-extemas">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="practico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('practico')">Contenido práctico</a> <span>›</span> <span>Exámenes por temas</span></div>
-      </div>
+    <!-- ═══ EXÁMENES POR TEMA ═══ -->
+    <section class="screen" id="screen-extemas" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <a href="#/test">Test</a> <span aria-hidden="true">›</span> <span aria-current="page">Exámenes por tema</span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Exámenes por temas</h1>
-        <p class="page-sub">Elige un tema para hacer un test corto de refuerzo (15 preguntas).</p>
-        <div class="toolbar">
-          <div class="search-box"><svg class="icon"><use href="#i-search"/></svg><input type="text" placeholder="Buscar un tema…"></div>
-          <button class="filter-chip active">Todos</button>
-          <button class="filter-chip">Bloque I</button>
-          <button class="filter-chip">Bloque II</button>
-        </div>
-        <div class="temas-grid" id="grid-extemas"></div>
+        <h1 class="page-title">Exámenes por tema</h1>
+        <p class="page-sub">Elige un tema: 15 preguntas al azar de su banco en 15 minutos.</p>
+        <div id="extemas-fichas"></div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: EXAMEN DE UN TEMA (nuevo test + historial)
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-extema">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="practico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb">
-          <a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span>
-          <a onclick="showScreen('practico')">Contenido práctico</a> <span>›</span>
-          <a onclick="showScreen('extemas')">Exámenes por temas</a> <span>›</span> <span>Tema 11</span>
-        </div>
-      </div>
+    <!-- ═══ EXAMEN DE UN TEMA ═══ -->
+    <section class="screen" id="screen-extema" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <a href="#/test">Test</a> <span aria-hidden="true">›</span> <a href="#/examenes">Exámenes por tema</a> <span aria-hidden="true">›</span> <span aria-current="page" id="extema-crumb"></span></nav></div>
       <div class="main-body">
-        <div class="tema-hero" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-          <div>
-            <div class="tema-eyebrow"><span class="badge badge-azul">Tema 11 · Parte II</span></div>
-            <h1 style="font-size:18px">Informática básica. Representación y comunicación de la información</h1>
-          </div>
-          <button class="btn btn-azul btn-lg" onclick="showScreen('resultado')"><svg class="icon"><use href="#i-plus"/></svg> Nuevo test</button>
+        <div class="card tema-hero" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div><div class="tema-eyebrow"><span class="badge badge-azul" id="extema-badge"></span></div><h1 id="extema-title" style="font-size:20px"></h1><a id="extema-link" href="#" style="font-size:13px">Abrir el tema</a></div>
+          <button type="button" class="btn btn-azul btn-lg btn-empezar" id="extema-start"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Nuevo examen</button>
         </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <h3 style="font-size:14px;font-weight:700;color:var(--gris-800)">Test anteriores de este tema</h3>
-          <span class="badge badge-gris">16 intentos en total</span>
-        </div>
-        <div class="card" style="overflow-x:auto">
-          <table class="hist-table">
-            <thead><tr><th>Intento</th><th>Fecha</th><th>Aciertos</th><th>Nota</th><th>Estado</th><th></th></tr></thead>
-            <tbody id="hist-extema"></tbody>
-          </table>
-        </div>
+        <h2 class="section-title">Exámenes anteriores de este tema</h2>
+        <div class="card" style="overflow-x:auto"><table class="hist-table"><thead><tr><th scope="col">Fecha</th><th scope="col">Duración</th><th scope="col">Aciertos</th><th scope="col">Nota</th><th scope="col">Resultado</th><th scope="col"><span class="visually-hidden">Revisión</span></th></tr></thead><tbody id="hist-extema"></tbody></table></div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: RESULTADO / REVISIÓN DE INTENTO
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-resultado">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="practico"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <a onclick="showScreen('extema')">Tema 11</a> <span>›</span> <span>Resultado</span></div>
-      </div>
+    <!-- ═══ EXAMEN EN CURSO ═══ -->
+    <section class="screen runner" id="screen-runner" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/test">Test</a> <span aria-hidden="true">›</span> <span aria-current="page" id="runner-crumb"></span></nav></div>
       <div class="main-body">
-        <h1 class="page-title">Resultado del intento</h1>
-        <p class="page-sub">Test de refuerzo · Tema 11 · hoy a las 18:42 · duración 9 min</p>
-
-        <div class="card result-hero">
-          <div class="result-ring" style="background:var(--verde-bg);border:3px solid var(--verde)">
-            <div class="rn" style="color:var(--verde)">7.8</div><div class="rd">sobre 10</div>
-          </div>
-          <div class="result-breakdown">
-            <div class="rb-item"><div class="rb-num" style="color:var(--verde)">12</div><div class="rb-lbl">Aciertos</div></div>
-            <div class="rb-item"><div class="rb-num" style="color:var(--rojo)">2</div><div class="rb-lbl">Fallos</div></div>
-            <div class="rb-item"><div class="rb-num" style="color:var(--gris-400)">1</div><div class="rb-lbl">En blanco</div></div>
-          </div>
+        <h1 class="page-title" id="runner-title"></h1>
+        <div class="test-bar">
+          <div class="kpi">Contestadas<b id="runner-cont">0</b></div>
+          <span class="timer" id="runner-timer" role="timer" aria-label="Tiempo restante"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> 0:00</span>
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-verde" id="runner-entregar"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Entregar</button>
         </div>
-
-        <h3 style="font-size:14px;font-weight:700;color:var(--gris-800);margin-bottom:12px">Revisión pregunta a pregunta</h3>
-        <div class="qlist">
-          <div class="qlist-row"><div class="ql-icon ok"><svg class="icon"><use href="#i-check"/></svg></div><div class="ql-text">1. ¿Cuál es la unidad mínima de información?</div><span class="badge badge-verde">Correcta</span></div>
-          <div class="qlist-row"><div class="ql-icon ok"><svg class="icon"><use href="#i-check"/></svg></div><div class="ql-text">2. Un Kilobyte equivale a…</div><span class="badge badge-verde">Correcta</span></div>
-          <div class="qlist-row"><div class="ql-icon ko"><svg class="icon"><use href="#i-x"/></svg></div><div class="ql-text">3. El sistema hexadecimal utiliza…</div><span class="badge badge-rojo">Incorrecta</span></div>
-          <div class="qlist-row"><div class="ql-icon blank"><svg class="icon"><use href="#i-x"/></svg></div><div class="ql-text">4. La memoria RAM se caracteriza por…</div><span class="badge badge-gris">En blanco</span></div>
-          <div class="qlist-row"><div class="ql-icon ok"><svg class="icon"><use href="#i-check"/></svg></div><div class="ql-text">5. Un procesador multinúcleo permite…</div><span class="badge badge-verde">Correcta</span></div>
-        </div>
-
-        <div style="display:flex;gap:12px;margin-top:24px">
-          <button class="btn btn-azul" onclick="showScreen('extema')"><svg class="icon"><use href="#i-refresh"/></svg> Volver a intentar</button>
-          <button class="btn btn-ghost" onclick="showScreen('extemas')">Volver al listado</button>
-        </div>
+        <p class="page-sub">Pulsa una respuesta para marcarla; vuelve a pulsarla para dejar la pregunta en blanco. Las preguntas en blanco no restan.</p>
+        <div class="supuesto" id="runner-supuesto" hidden></div>
+        <div id="runner-qs"></div>
+        <div style="margin-top:20px"><button type="button" class="btn btn-verde btn-lg" id="runner-entregar-2"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Entregar el examen</button></div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- ═══════════════════════════════════════
-     SCREEN: ESTADÍSTICAS
-     ═══════════════════════════════════════ -->
-<div class="screen" id="screen-stats">
-  <div class="app">
-    <aside class="sidebar" data-sidebar="global" data-active="stats"></aside>
-    <div class="main">
-      <div class="main-header">
-        <div class="breadcrumb"><a onclick="showScreen('home')"><svg class="icon"><use href="#i-home"/></svg></a> <span>›</span> <span>Estadísticas</span></div>
+    <!-- ═══ RESULTADO ═══ -->
+    <section class="screen" id="screen-resultado" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <a href="#/test">Test</a> <span aria-hidden="true">›</span> <span aria-current="page">Resultado</span></nav></div>
+      <div class="main-body">
+        <h1 class="page-title" id="res-title">Resultado</h1>
+        <div id="res-body"></div>
       </div>
+    </section>
+
+    <!-- ═══ ESTADÍSTICAS ═══ -->
+    <section class="screen" id="screen-stats" hidden>
+      <div class="main-header"><nav class="breadcrumb" aria-label="Ruta"><a href="#/progreso" aria-label="Mi progreso"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></a> <span aria-hidden="true">›</span> <span aria-current="page">Estadísticas</span></nav></div>
       <div class="main-body">
         <h1 class="page-title">Estadísticas</h1>
-        <p class="page-sub">Tu evolución y rendimiento por bloque.</p>
-
-        <div class="stats-grid">
-          <div class="card stat-card"><div class="stat-label">Temas completados</div><div class="stat-value">8 <span style="font-size:14px;color:var(--gris-400);font-weight:600">/ 40</span></div><div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:20%"></div></div></div>
-          <div class="card stat-card"><div class="stat-label">Nota media teóricos</div><div class="stat-value" style="color:var(--verde)">7.4</div></div>
-          <div class="card stat-card"><div class="stat-label">Nota media prácticos</div><div class="stat-value">6.8</div></div>
-          <div class="card stat-card"><div class="stat-label">Simulacros realizados</div><div class="stat-value">12</div><div class="stat-sub">6 teóricos + 6 prácticos</div></div>
-        </div>
-
-        <div class="stats-section">
-          <h3>Rendimiento por tema (Parte I · Administrativo)</h3>
-          <div class="card card-pad">
-            <div class="chart-bar"><div class="chart-label">Tema 1</div><div class="chart-track"><div class="chart-fill blue" style="width:86%">86%</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Tema 2</div><div class="chart-track"><div class="chart-fill blue" style="width:79%">79%</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Tema 3</div><div class="chart-track"><div class="chart-fill blue" style="width:81%">81%</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Tema 4</div><div class="chart-track"><div class="chart-fill amber" style="width:68%">68%</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Tema 7</div><div class="chart-track"><div class="chart-fill blue" style="width:90%">90%</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Tema 10</div><div class="chart-track"><div class="chart-fill blue" style="width:74%">74%</div></div></div>
-          </div>
-        </div>
-
-        <div class="stats-section">
-          <h3>Evolución de simulacros teóricos</h3>
-          <div class="card card-pad">
-            <div class="chart-bar"><div class="chart-label">Sim. #1</div><div class="chart-track"><div class="chart-fill dark" style="width:60%">54/90</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Sim. #2</div><div class="chart-track"><div class="chart-fill dark" style="width:65%">59/90</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Sim. #3</div><div class="chart-track"><div class="chart-fill blue" style="width:72%">65/90</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Sim. #4</div><div class="chart-track"><div class="chart-fill blue" style="width:78%">70/90</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Sim. #5</div><div class="chart-track"><div class="chart-fill verde" style="width:83%">75/90</div></div></div>
-            <div class="chart-bar"><div class="chart-label">Sim. #6</div><div class="chart-track"><div class="chart-fill verde" style="width:87%">78/90</div></div></div>
-          </div>
+        <p class="page-sub">Tu rendimiento por tema y la evolución de tus simulacros.</p>
+        <div class="stats-grid" id="stats-cards"></div>
+        <h2 class="section-title">Rendimiento por tema (nota media)</h2>
+        <div class="card card-pad" id="stats-temas"></div>
+        <h2 class="section-title">Últimos simulacros</h2>
+        <div class="card card-pad" id="stats-sims"></div>
+        <h2 class="section-title">Tus datos</h2>
+        <div class="card card-pad" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <p style="font-size:14px;color:var(--g600);flex:1;min-width:240px">Tu avance de lectura y tus intentos están guardados solo en este navegador. Puedes borrarlos cuando quieras.</p>
+          <button type="button" class="btn btn-rojo-ghost" id="borrar-datos"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg> Borrar mis datos</button>
         </div>
       </div>
+    </section>
+
+  </main>
+</div>
+<footer class="pie">
+  <div class="pie-inner">
+    <img src="assets/img/firma.svg" alt="Ayuntamiento de Madrid" class="pie-logo" width="140" height="38">
+    <div class="pie-text">
+      <p>Temario Técnico/a Auxiliar TIC · Ayuntamiento de Madrid</p>
+      <ul class="pie-links">
+        <li><a href="https://www.madrid.es/portales/munimadrid/es/Inicio/Accesibilidad/Declaracion-de-accesibilidad/?vgnextoid=b4a7ba9d3e023310VgnVCM1000000b205a0aRCRD&vgnextchannel=1ade43db40317010VgnVCM100000dc0ca8c0RCRD">Declaración de accesibilidad</a></li>
+        <li><a href="https://www.madrid.es/portales/munimadrid/es/Inicio/Proteccion-de-datos/Proteccion-de-datos/?vgnextfmt=default&vgnextoid=2c241e7b0f578010VgnVCM100000dc0ca8c0RCRD&vgnextchannel=251f43db40317010VgnVCM100000dc0ca8c0RCRD">Protección de datos</a></li>
+        <li><a href="mailto:procesosselectivostic@madrid.es" data-buzon>Buzón de sugerencias</a></li>
+      </ul>
     </div>
   </div>
-</div>
-
-<script>
-/* ═══ TEMARIO (fuente: BOAM 10.032 — 40 temas reales) ═══ */
-const TEMAS = [
-{n:1,titulo:"La Constitución Española (I): estructura, derechos y deberes fundamentales",corta:"La Constitución Española (I)",parte:1,progreso:100,nota:8.6},
-{n:2,titulo:"La Constitución Española (II): organización territorial del Estado y CCAA",corta:"La Constitución Española (II)",parte:1,progreso:100,nota:7.9},
-{n:3,titulo:"Reglamento Orgánico del Gobierno de Madrid (I): Áreas de Gobierno",corta:"ROGA Madrid (I): Áreas de Gobierno",parte:1,progreso:100,nota:8.1},
-{n:4,titulo:"Reglamento Orgánico del Gobierno de Madrid (II): los Distritos",corta:"ROGA Madrid (II): los Distritos",parte:1,progreso:100,nota:6.8},
-{n:5,titulo:"EBEP: clases de personal, situaciones administrativas y régimen disciplinario",corta:"EBEP: Estatuto del Empleado Público",parte:1,progreso:60,nota:null},
-{n:6,titulo:"LPAC: derechos ciudadanos y Registros. Transparencia y acceso a información pública",corta:"LPAC: derechos y transparencia",parte:1,progreso:0,nota:null},
-{n:7,titulo:"LPAC: procedimiento administrativo, fases y recursos administrativos",corta:"LPAC: procedimiento y recursos",parte:1,progreso:100,nota:9.0},
-{n:8,titulo:"Haciendas Locales (TRLHL): recursos, tasas, contribuciones e impuestos",corta:"Haciendas Locales (TRLHL)",parte:1,progreso:0,nota:null},
-{n:9,titulo:"Prevención de Riesgos Laborales y Acuerdo-Convenio del Ayuntamiento",corta:"PRL y Acuerdo-Convenio",parte:1,progreso:0,nota:null},
-{n:10,titulo:"Igualdad efectiva de mujeres y hombres, Ley LGTBI y Plan de Igualdad",corta:"Igualdad efectiva y Plan de Igualdad",parte:1,progreso:100,nota:7.4},
-{n:11,titulo:"Informática básica: representación de la información y arquitectura de ordenadores",corta:"Informática básica y arquitectura",parte:2,progreso:100,nota:8.2},
-{n:12,titulo:"Periféricos: conectividad, impresión, almacenamiento y digitalización",corta:"Periféricos y conectividad",parte:2,progreso:100,nota:7.6},
-{n:13,titulo:"Tipos abstractos, estructuras de datos y formatos de ficheros",corta:"Estructuras de datos y ficheros",parte:2,progreso:100,nota:6.9},
-{n:14,titulo:"Sistemas operativos: Windows, Unix/Linux y dispositivos móviles",corta:"Sistemas operativos",parte:2,progreso:100,nota:8.0},
-{n:15,titulo:"Sistemas gestores de bases de datos: relacionales, orientados a objetos y NoSQL",corta:"Bases de datos: SGBD",parte:2,progreso:40,nota:null},
-{n:16,titulo:"Modelo conceptual de datos: entidades, atributos, relaciones y diagramas de flujo",corta:"Modelo conceptual de datos",parte:2,progreso:0,nota:null},
-{n:17,titulo:"Diseño de bases de datos: modelo lógico relacional y normalización",corta:"Diseño de bases de datos",parte:2,progreso:0,nota:null},
-{n:18,titulo:"Lenguajes de programación: tipos de datos, estructuras de control y funciones",corta:"Lenguajes de programación",parte:2,progreso:0,nota:null},
-{n:19,titulo:"SQL estándar ANSI: procedimientos almacenados, eventos y disparadores",corta:"SQL y procedimientos almacenados",parte:2,progreso:0,nota:null},
-{n:20,titulo:"Diseño y programación orientada a objetos: patrones de diseño y UML",corta:"Programación orientada a objetos",parte:2,progreso:0,nota:null},
-{n:21,titulo:"La arquitectura Java EE: elementos, productos y herramientas",corta:"Arquitectura Java EE",parte:2,progreso:0,nota:null},
-{n:22,titulo:"Arquitectura cliente/servidor y multicapa. Servicios web y protocolos",corta:"Cliente/servidor y multicapa",parte:2,progreso:0,nota:null},
-{n:23,titulo:"Aplicaciones web: desarrollo front-end y en servidor. HTML, XML y navegadores",corta:"Aplicaciones web",parte:2,progreso:0,nota:null},
-{n:24,titulo:"Desarrollo para dispositivos móviles: frameworks nativos e híbridos",corta:"Desarrollo para móviles",parte:2,progreso:0,nota:null},
-{n:25,titulo:"Accesibilidad, usabilidad y seguridad en el desarrollo de aplicaciones",corta:"Accesibilidad y usabilidad",parte:2,progreso:0,nota:null},
-{n:26,titulo:"Almacenamiento y virtualización: políticas de backup y recuperación",corta:"Almacenamiento y backup",parte:2,progreso:0,nota:null},
-{n:27,titulo:"Administración del sistema operativo y software de base",corta:"Administración del SO",parte:2,progreso:0,nota:null},
-{n:28,titulo:"Virtualización de sistemas y virtualización de puestos de usuario",corta:"Virtualización de sistemas",parte:2,progreso:0,nota:null},
-{n:29,titulo:"Control remoto de puesto de usuario y gestión de incidencias",corta:"Control remoto e incidencias",parte:2,progreso:0,nota:null},
-{n:30,titulo:"Administración de redes de área local: usuarios, dispositivos y tráfico",corta:"Administración de redes LAN",parte:2,progreso:0,nota:null},
-{n:31,titulo:"Computación distribuida y Cloud: IaaS, PaaS, SaaS",corta:"Computación distribuida y Cloud",parte:2,progreso:0,nota:null},
-{n:32,titulo:"Seguridad de los sistemas de información: amenazas y criptografía",corta:"Seguridad de sistemas",parte:2,progreso:0,nota:null},
-{n:33,titulo:"Comunicaciones: medios de transmisión y redes de comunicaciones",corta:"Comunicaciones y redes",parte:2,progreso:0,nota:null},
-{n:34,titulo:"El modelo TCP/IP y el modelo de referencia OSI",corta:"Modelo TCP/IP y OSI",parte:2,progreso:0,nota:null},
-{n:35,titulo:"Internet: arquitectura de red, protocolos HTTP, HTTPS y SSL/TLS",corta:"Internet: arquitectura y protocolos",parte:2,progreso:0,nota:null},
-{n:36,titulo:"Seguridad en redes de comunicaciones: perimetral, VPN y puesto de usuario",corta:"Seguridad en redes",parte:2,progreso:0,nota:null},
-{n:37,titulo:"Redes locales: tipología, técnicas de transmisión y dispositivos",corta:"Redes locales",parte:2,progreso:0,nota:null},
-{n:38,titulo:"Sistema de radiocomunicación TETRA",corta:"TETRA",parte:2,progreso:0,nota:null},
-{n:39,titulo:"Esquema Nacional de Seguridad y Esquema Nacional de Interoperabilidad",corta:"ENS y ENI",parte:2,progreso:0,nota:null},
-{n:40,titulo:"Herramientas de trabajo en grupo, videoconferencia y salas",corta:"Herramientas de trabajo en grupo",parte:2,progreso:0,nota:null},
-];
-
-function icon(name,cls){return '<svg class="icon '+(cls||'')+'"><use href="#i-'+name+'"/></svg>';}
-function estadoBadge(p){
-  if(p>=100) return '<span class="badge badge-verde">'+icon('check','icon-sm')+' Completado</span>';
-  if(p>0) return '<span class="badge badge-amber">En curso · '+p+'%</span>';
-  return '<span class="badge badge-gris">No iniciado</span>';
-}
-function notaBadge(nota){
-  if(nota>=7) return '<span class="badge badge-verde">Apto</span>';
-  if(nota>=5) return '<span class="badge badge-amber">Ajustado</span>';
-  return '<span class="badge badge-rojo">No apto</span>';
-}
-
-/* ═══ SIDEBAR (plantilla única, se inyecta en cada pantalla) ═══ */
-function sidebarGlobalHTML(active){
-  function item(key,ic,label){return '<a class="sb-link '+(active===key?'active':'')+'" onclick="showScreen(\''+key+'\')">'+icon(ic)+' '+label+'</a>';}
-  return ''
-    +'<div class="sb-header"><img src="assets/logo-madrid-azul.png" alt="Ayuntamiento de Madrid"></div>'
-    +'<nav class="sb-nav">'
-    +'<div class="sb-section">Principal</div>'
-    +item('home','home','Inicio')
-    +'<div class="sb-section">Contenido</div>'
-    +item('teorico','book','Contenido teórico')
-    +item('practico','clipboard','Contenido práctico')
-    +'<div class="sb-section">Mi progreso</div>'
-    +item('stats','bar','Estadísticas')
-    +'<a class="sb-link">'+icon('user')+' Perfil</a>'
-    +'</nav>'
-    +'<div class="sb-user"><div class="sb-avatar">JM</div><div class="sb-user-info"><strong>Joan Márquez</strong><span>Opositor</span></div><a href="#" title="Cerrar sesión">'+icon('log-out')+'</a></div>';
-}
-function sidebarTemaHTML(temaN, active){
-  var t = TEMAS.find(function(x){return x.n===Number(temaN);}) || TEMAS[10];
-  function tab(key,ic,label){return '<a class="sb-link small '+(active===key?'active':'')+'" onclick="setTemaTab(\''+key+'\')"><span class="num">'+icon(ic,'icon-sm')+'</span> '+label+'</a>';}
-  return ''
-    +'<div class="sb-header"><img src="assets/logo-madrid-azul.png" alt="Ayuntamiento de Madrid"></div>'
-    +'<nav class="sb-nav">'
-    +'<div class="sb-section">Principal</div>'
-    +'<a class="sb-link" onclick="showScreen(\'home\')">'+icon('home')+' Inicio</a>'
-    +'<div class="sb-section">Tema '+t.n+' · Parte '+(t.parte===1?'I':'II')+'</div>'
-    +tab('indice','list','Índice')
-    +tab('contenido','book','Contenido')
-    +'<a class="sb-link small" onclick="showScreen(\'test\')"><span class="num">'+icon('check-circle','icon-sm')+'</span> Test final</a>'
-    +tab('caso','briefcase','Caso práctico')
-    +tab('descargas','download','Descargas')
-    +'</nav>';
-}
-function renderSidebars(){
-  document.querySelectorAll('[data-sidebar="global"]').forEach(function(el){
-    el.innerHTML = sidebarGlobalHTML(el.getAttribute('data-active'));
-  });
-  document.querySelectorAll('[data-sidebar="tema"]').forEach(function(el){
-    el.innerHTML = sidebarTemaHTML(el.getAttribute('data-tema'), el.getAttribute('data-active'));
-  });
-}
-function setTemaTab(key){
-  document.querySelectorAll('#tema-panels .subtab-panel').forEach(function(p){ p.classList.toggle('active', p.dataset.panel===key); });
-  document.querySelectorAll('[data-sidebar="tema"]').forEach(function(el){ el.setAttribute('data-active', key); });
-  renderSidebars();
-  window.scrollTo(0,0);
-}
-
-/* ═══ GRIDS de temas (data-driven, no HTML repetido a mano) ═══ */
-function temaTile(t, opts){
-  opts = opts || {};
-  var onclick = opts.exam ? "showScreen('extema')" : "showScreen('tema')";
-  var foot = opts.exam
-    ? '<span class="badge badge-gris">'+((t.n%6)+2)+' intentos</span>'
-    : estadoBadge(t.progreso) + (t.nota ? '<span style="font-size:11px;font-weight:700;color:var(--gris-400)">'+t.nota.toFixed(1)+'</span>' : '');
-  return '<div class="tema-tile" onclick="'+onclick+'">'
-    +'<div class="tt-num">Tema '+t.n+'</div>'
-    +'<div class="tt-title">'+t.corta+'</div>'
-    +'<div class="tt-foot">'+foot+'</div>'
-    +'</div>';
-}
-function renderGrid(id, list, opts){
-  var el = document.getElementById(id);
-  if(!el) return;
-  el.innerHTML = list.map(function(t){return temaTile(t,opts);}).join('');
-}
-function renderTemarioList(){
-  var el = document.getElementById('temario-list');
-  if(!el) return;
-  var bloque1 = TEMAS.filter(function(t){return t.parte===1;});
-  var bloque2 = TEMAS.filter(function(t){return t.parte===2;});
-  function row(t){
-    return '<div class="temario-row '+(t.progreso>=100?'done':'')+'">'
-      +'<div class="tr-num">'+(t.progreso>=100 ? icon('check','icon-sm') : t.n)+'</div>'
-      +'<div class="tr-title">Tema '+t.n+' — '+t.corta+'</div>'
-      +estadoBadge(t.progreso)
-      +'<div class="tr-actions"><a class="dl-link">'+icon('download','icon-sm')+' PDF</a></div>'
-      +'</div>';
-  }
-  el.innerHTML = ''
-    +'<div class="temario-list">'
-    +'<div class="group-head">Bloque I · Administrativo (Temas 1-10)</div>'
-    + bloque1.map(row).join('')
-    +'<div class="group-head">Bloque II · Técnico (Temas 11-40)</div>'
-    + bloque2.map(row).join('')
-    +'</div>';
-}
-
-/* ═══ HISTORIALES (simulacros y exámenes por tema) ═══ */
-var HIST_SIMTEO = [
-  {n:48,fecha:'05 ago 2026',dur:'87 min',aciertos:'78/90',nota:8.7},
-  {n:47,fecha:'02 ago 2026',dur:'90 min',aciertos:'70/90',nota:7.8},
-  {n:46,fecha:'29 jul 2026',dur:'85 min',aciertos:'65/90',nota:7.2},
-  {n:45,fecha:'26 jul 2026',dur:'90 min',aciertos:'59/90',nota:6.6},
-  {n:44,fecha:'22 jul 2026',dur:'88 min',aciertos:'54/90',nota:6.0}
-];
-var HIST_SIMPRAC = [
-  {n:31,fecha:'04 ago 2026',dur:'58 min',aciertos:'26/30',nota:8.7},
-  {n:30,fecha:'01 ago 2026',dur:'60 min',aciertos:'22/30',nota:7.3},
-  {n:29,fecha:'28 jul 2026',dur:'54 min',aciertos:'19/30',nota:6.3},
-  {n:28,fecha:'24 jul 2026',dur:'60 min',aciertos:'17/30',nota:5.7}
-];
-var HIST_EXTEMA = [
-  {n:16,fecha:'hoy · 18:42',aciertos:'12/15',nota:7.8},
-  {n:15,fecha:'ayer · 09:10',aciertos:'10/15',nota:6.6},
-  {n:14,fecha:'02 ago 2026',aciertos:'13/15',nota:8.6},
-  {n:13,fecha:'30 jul 2026',aciertos:'9/15',nota:5.9}
-];
-function fillHist(id, rows, withDuration){
-  var el = document.getElementById(id);
-  if(!el) return;
-  el.innerHTML = rows.map(function(r){
-    var color = r.nota>=7?'var(--verde)':r.nota>=5?'var(--amber)':'var(--rojo)';
-    return '<tr onclick="showScreen(\'resultado\')">'
-      +'<td>#'+r.n+'</td><td>'+r.fecha+'</td>'
-      +(withDuration ? '<td>'+r.dur+'</td>' : '')
-      +'<td>'+r.aciertos+'</td>'
-      +'<td class="cell-nota" style="color:'+color+'">'+r.nota.toFixed(1)+'</td>'
-      +'<td>'+notaBadge(r.nota)+'</td>'
-      +'<td class="cell-action">Ver revisión '+icon('chevron-right','icon-sm')+'</td>'
-      +'</tr>';
-  }).join('');
-}
-
-/* ═══ NAVEGACIÓN ═══ */
-var SCREEN_ORDER = ['landing','home','teorico','temario','parte1','parte2','tema','test','practico','simteo','simprac','extemas','extema','resultado','stats'];
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-  var target = document.getElementById('screen-'+id);
-  if(target) target.classList.add('active');
-  document.querySelectorAll('.demo-tab').forEach(function(t){t.classList.remove('active');});
-  var idx = SCREEN_ORDER.indexOf(id);
-  var tabs = document.querySelectorAll('.demo-tab');
-  if(idx>-1 && tabs[idx]) tabs[idx].classList.add('active');
-  window.scrollTo(0,0);
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-  renderSidebars();
-  renderGrid('grid-parte1', TEMAS.filter(function(t){return t.parte===1;}));
-  renderGrid('grid-parte2', TEMAS.filter(function(t){return t.parte===2;}));
-  renderGrid('grid-extemas', TEMAS, {exam:true});
-  renderTemarioList();
-  fillHist('hist-simteo', HIST_SIMTEO, true);
-  fillHist('hist-simprac', HIST_SIMPRAC, true);
-  fillHist('hist-extema', HIST_EXTEMA, false);
-});
-</script>
+</footer>
+<script src="assets/js/temas.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>
