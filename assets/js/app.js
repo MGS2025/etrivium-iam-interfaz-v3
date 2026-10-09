@@ -157,9 +157,11 @@
 
     // Pestañas (con enlace directo por #hash).
     var tabs = $$('.tab'), panels = $$('.panel');
+    // Pestañas ocultas (data-ocultas): su panel sigue en la página. «casos» se abre con su botón; el resto vuelve al índice.
+    var ocultas = (document.body.getAttribute('data-ocultas') || '').split(',').filter(Boolean);
     function alPanel() { var bar = $('.tabs'); if (!bar) return; var y = bar.getBoundingClientRect().top + window.pageYOffset - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64); window.scrollTo({ top: Math.max(0, y) }); }
     function show(key, focus) {
-      if (!$('#panel-' + key)) key = 'indice';
+      if (!$('#panel-' + key) || (ocultas.indexOf(key) > -1 && key !== 'casos')) key = 'indice';
       tabs.forEach(function (t) { var on = t.getAttribute('data-tab') === key; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; if (on && focus) t.focus(); });
       panels.forEach(function (p) { p.classList.toggle('active', p.id === 'panel-' + key); });
       $$('.sb-tema a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === key); });
@@ -175,6 +177,8 @@
     });
     $$('.sb-tema a').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); history.replaceState(null, '', '#' + a.getAttribute('data-tab')); show(a.getAttribute('data-tab')); alPanel(); }); });
     window.addEventListener('hashchange', function () { show(location.hash.slice(1).split('/')[0] || 'indice'); });
+    $$('[data-abrir]').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); var k = a.getAttribute('data-abrir'); history.replaceState(null, '', '#' + k); show(k); alPanel(); }); });
+    $$('[data-volver]').forEach(function (a) { a.addEventListener('click', function (ev) { ev.preventDefault(); history.replaceState(null, '', '#indice'); show('indice'); alPanel(); }); });
 
     // Enlaces del índice a cada epígrafe del contenido.
     $$('.outline a[data-ep]').forEach(function (a) {
@@ -528,9 +532,9 @@
         stat('Temas completados', completos + ' <small>/ 40</small>', '<div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:' + (totalEp ? Math.round(hechos / totalEp * 100) : 0) + '%"></div></div>')
         + stat('Media simulacro teórico', media(teo) === null ? '—' : fmtNota(media(teo)), '<div class="stat-sub">' + teo.length + ' intentos</div>')
         + stat('Media simulacro práctico', media(pra) === null ? '—' : fmtNota(media(pra)), '<div class="stat-sub">' + pra.length + ' intentos</div>')
-        + stat('Tests realizados', String(ints.length), '<div class="stat-sub">exámenes, simulacros y bancos</div>');
+        + stat('Tests realizados', String(ints.length), '<div class="stat-sub">exámenes y simulacros</div>');
       var porTema = TEMAS.map(function (t) { var l = ints.filter(function (i) { return i.tema === t.n; }); return { t: t, m: media(l), n: l.length }; }).filter(function (x) { return x.n; });
-      $('#stats-temas').innerHTML = porTema.length ? porTema.map(function (x) { return barra('Tema ' + x.t.n, x.m); }).join('') : '<div class="empty">Haz exámenes de tema o corrige el banco de preguntas de un tema para ver tu rendimiento aquí.</div>';
+      $('#stats-temas').innerHTML = porTema.length ? porTema.map(function (x) { return barra('Tema ' + x.t.n, x.m); }).join('') : '<div class="empty">Haz exámenes de tema para ver aquí tu rendimiento en cada uno.</div>';
       var sims = teo.concat(pra).sort(function (a, b) { return a.fecha - b.fecha; }).slice(-10);
       $('#stats-sims').innerHTML = sims.length ? sims.map(function (i) { return barra((i.tipo === 'simteo' ? 'Teórico' : 'Práctico') + ' ' + new Date(i.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }), i.nota); }).join('') : '<div class="empty">Aún no has hecho ningún simulacro.</div>';
     }

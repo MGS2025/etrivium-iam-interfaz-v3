@@ -198,6 +198,9 @@ body.is-landing .app{display:none;}
 .tab .count{font-size:11px;font-weight:700;background:var(--g200);color:var(--g600);border-radius:999px;padding:1px 7px;}
 .panel{display:none;}
 .panel.active{display:block;}
+.panel-volver{margin:0 0 14px;font-size:14px;font-weight:600;}
+.panel-volver a{text-decoration:none;}
+.panel-volver a:hover{text-decoration:underline;}
 .panel-card{background:#fff;border:1px solid var(--g200);border-radius:var(--r-lg);padding:28px 32px;}
 
 /* Índice con casillas de «leído» */
