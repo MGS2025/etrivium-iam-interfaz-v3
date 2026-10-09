@@ -44,7 +44,7 @@ a{color:var(--azul);}
 .banda-spacer{flex:1;}
 .banda-link{color:#fff;opacity:.9;text-decoration:none;font-size:14px;font-weight:500;}
 .banda-link:hover{opacity:1;text-decoration:underline;}
-.menu-toggle{display:none;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;width:40px;height:36px;align-items:center;justify-content:center;cursor:pointer;}
+.menu-toggle{display:inline-flex;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:6px;width:40px;height:36px;align-items:center;justify-content:center;cursor:pointer;}
 
 /* ── Pie (oscuro con filete azul) ── */
 .pie{background:var(--pie);color:#fff;border-top:4px solid var(--azul);padding:24px;margin-top:auto;}
@@ -295,6 +295,16 @@ details.solucion > .sol-body{padding:4px 18px 14px;background:#fff;border-top:1p
 .test-bar .spacer{flex:1;}
 .timer{display:inline-flex;align-items:center;gap:6px;background:var(--g800);color:#fff;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
 .timer.low{background:var(--rojo);}
+.timer.pausado{background:var(--g500,#6b7280);}
+.pausa-aviso{text-align:center;padding:48px 24px;margin:16px 0;border:2px dashed var(--azul);border-radius:12px;background:var(--azul-05);}
+.pausa-aviso h2{margin:0 0 8px;color:var(--azul);}
+.pausa-aviso p{margin:0 0 20px;}
+.runner.en-pausa #runner-qs,.runner.en-pausa #runner-supuesto,.runner.en-pausa #runner-entregar-2{display:none!important;}
+/* Menú lateral plegable en escritorio; en móvil sigue siendo el panel deslizante. */
+@media (min-width:901px){
+  body.is-landing .menu-toggle{display:none;}
+  body.sb-plegado .sidebar{display:none;}
+}
 .question{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:18px 20px;margin-bottom:14px;}
 .q-num{font-size:11.5px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
 .q-text{font-size:15px;font-weight:600;color:var(--g800);margin-bottom:12px;line-height:1.5;}
@@ -386,6 +396,8 @@ details.solucion > .sol-body{padding:4px 18px 14px;background:#fff;border-top:1p
   .panel.print{display:block!important;break-before:page;}
   .panel.print.first{break-before:auto;}
   .print-only{display:block;}
+  .print-membrete:not([hidden]){display:flex!important;align-items:center;gap:14px;border-bottom:2px solid #0055a0;padding-bottom:8px;margin-bottom:14px;color:#0055a0;font-weight:600;font-size:10pt;}
+  .print-membrete img{height:38px;width:auto;}
   .print-title{font-size:13pt;font-weight:700;color:var(--azul);margin:0 0 10px;border-bottom:2px solid var(--azul);padding-bottom:4px;}
   .avance-print{border:2px solid var(--verde);border-radius:6px;padding:8px 12px;margin:10px 0 14px;font-weight:700;color:var(--verde);}
   .contenido h2,.contenido h3{break-after:avoid;}

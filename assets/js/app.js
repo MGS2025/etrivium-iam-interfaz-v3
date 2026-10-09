@@ -63,10 +63,25 @@
   /* ── Cabecera móvil, aviso de almacenamiento y menú ─────────── */
   function initChrome() {
     var sb = $('.sidebar'), ov = $('.overlay'), tg = $('.menu-toggle');
-    function close() { if (sb) sb.classList.remove('open'); if (ov) ov.classList.remove('visible'); if (tg) tg.setAttribute('aria-expanded', 'false'); }
+    // En escritorio el botón pliega y despliega el menú, y el navegador recuerda la elección; en móvil abre el panel.
+    var movil = window.matchMedia('(max-width:900px)'), MENU_KEY = 'temario-tic-c1-menu';
+    var plegado = false;
+    try { plegado = localStorage.getItem(MENU_KEY) === 'plegado'; } catch (err) {}
+    document.body.classList.toggle('sb-plegado', plegado);
+    function syncExpanded() { if (tg) tg.setAttribute('aria-expanded', String(movil.matches ? !!(sb && sb.classList.contains('open')) : !document.body.classList.contains('sb-plegado'))); }
+    function close() { if (sb) sb.classList.remove('open'); if (ov) ov.classList.remove('visible'); syncExpanded(); }
+    syncExpanded();
+    if (movil.addEventListener) movil.addEventListener('change', syncExpanded);
     if (tg && sb) tg.addEventListener('click', function () {
+      if (!movil.matches) {
+        var p = !document.body.classList.contains('sb-plegado');
+        document.body.classList.toggle('sb-plegado', p);
+        try { localStorage.setItem(MENU_KEY, p ? 'plegado' : 'abierto'); } catch (err) {}
+        syncExpanded();
+        return;
+      }
       var open = !sb.classList.contains('open');
-      sb.classList.toggle('open', open); if (ov) ov.classList.toggle('visible', open); tg.setAttribute('aria-expanded', String(open));
+      sb.classList.toggle('open', open); if (ov) ov.classList.toggle('visible', open); syncExpanded();
     });
     if (ov) ov.addEventListener('click', close);
     $$('.sidebar a').forEach(function (a) { a.addEventListener('click', close); });
@@ -424,7 +439,33 @@
 
     /* Ejecución de un examen o simulacro */
     var timerId = null;
-    function stopRunner() { running = null; if (timerId) clearInterval(timerId); timerId = null; window.onbeforeunload = null; }
+    function stopRunner() { running = null; if (timerId) clearInterval(timerId); timerId = null; window.onbeforeunload = null; pintarPausa(false); }
+    // Pausa: el reloj se para y las preguntas se ocultan; al reanudar, el inicio se desplaza lo que haya durado la pausa.
+    function pintarPausa(p) {
+      var scr = $('#screen-runner'), bt = $('#runner-pausa');
+      scr.classList.toggle('en-pausa', p);
+      $('#runner-pausa-aviso').hidden = !p;
+      $('#runner-entregar').disabled = p;
+      $('#runner-timer').classList.toggle('pausado', p);
+      bt.setAttribute('aria-pressed', String(p));
+      $('use', bt).setAttribute('href', p ? '#i-play' : '#i-pause');
+      $('span', bt).textContent = p ? 'Reanudar' : 'Pausar';
+    }
+    function pausar() {
+      if (!running || running.pausaDesde) return;
+      running.pausaDesde = Date.now(); clearInterval(timerId); timerId = null;
+      pintarPausa(true);
+      $('#runner-reanudar').focus();
+    }
+    function reanudar() {
+      if (!running || !running.pausaDesde) return;
+      running.inicio += Date.now() - running.pausaDesde; running.pausaDesde = null;
+      pintarPausa(false);
+      tick(); timerId = setInterval(tick, 1000);
+      $('#runner-pausa').focus();
+    }
+    $('#runner-pausa').addEventListener('click', function () { if (running && running.pausaDesde) reanudar(); else pausar(); });
+    $('#runner-reanudar').addEventListener('click', reanudar);
     function empezar(cfg) {
       var p = cfg.tipo === 'simprac' ? cargarPractico() : cargarPreguntas();
       $$('.btn-empezar').forEach(function (b) { b.disabled = true; });
@@ -448,7 +489,8 @@
           supuesto = practico; titulo = 'Simulacro · Parte práctica'; minutos = 60;
         }
         items = refs.map(pregunta);
-        running = { cfg: cfg, refs: refs, items: items, inicio: Date.now(), limite: minutos * 60 };
+        pintarPausa(false);
+        running = { cfg: cfg, refs: refs, items: items, inicio: Date.now(), limite: minutos * 60, pausaDesde: null };
         $('#runner-title').textContent = titulo;
         $('#runner-crumb').textContent = titulo;
         var sp = $('#runner-supuesto');
